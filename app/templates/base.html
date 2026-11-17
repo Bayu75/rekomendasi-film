@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MovieMatch{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind v4 via CDN untuk tahap awal; nanti diganti Tailwind CLI (static/css/app.css) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-background: #09090C;
+      --color-foreground: #F0F0F5;
+      --color-card: #111116;
+      --color-card-foreground: #E0E0E8;
+      --color-primary: #F5C518;
+      --color-primary-foreground: #09090C;
+      --color-secondary: #1C1C24;
+      --color-secondary-foreground: #A8A8B8;
+      --color-muted: #18181F;
+      --color-muted-foreground: #6E6E80;
+      --color-border: #252530;
+      --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); }
+  </style>
+</head>
+<body class="min-h-screen bg-background text-foreground font-sans antialiased flex flex-col">
+  {% include "partials/navbar.html" %}
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+  {% block footer %}{% include "partials/footer.html" %}{% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

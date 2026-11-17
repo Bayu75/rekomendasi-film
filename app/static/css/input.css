@@ -1,0 +1,4 @@
+/* Dipakai nanti saat pindah dari CDN ke Tailwind CLI.
+   Token lengkap: lihat docs/design-system.md */
+@import "tailwindcss";
+@source "../../templates";
