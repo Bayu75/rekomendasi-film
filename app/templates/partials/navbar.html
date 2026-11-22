@@ -1,8 +1,168 @@
-{# Frontend A: ganti dengan navbar lengkap sesuai desain #}
-<nav class="border-b border-border">
-  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-    <a href="{{ url_for('main.home') }}" class="font-display font-extrabold text-xl">
-      Movie<span class="text-primary">Match</span>
+{#- partials/navbar.html (pemilik: Frontend A) – sumber: figma-src/components/Navbar.tsx
+    Context: current_user ({name, email} | None), active_page (request.endpoint, mis. 'main.home')
+    Perilaku interaktif ada di static/js/navbar.js (scroll, menu mobile, dropdown, kotak cari). -#}
+{%- set page = active_page or (request.endpoint if request else '') -%}
+{%- set is_auth_page = page in ('auth.login', 'auth.register') -%}
+{%- set solid = 'bg-background/90 backdrop-blur-md border-b border-border shadow-lg shadow-black/20' -%}
+{%- macro avatar(name) -%}
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-black font-display select-none">
+  {{- name.split()[:2] | map('first') | join | upper -}}
+</div>
+{%- endmacro -%}
+{%- set link_active = 'text-primary bg-primary/10' -%}
+{%- set link_idle = 'text-secondary-foreground hover:text-foreground hover:bg-muted' -%}
+<header id="site-navbar" data-solid="{{ solid }}"{% if is_auth_page %} data-always-solid{% endif %}
+        class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 {{ solid if is_auth_page else 'bg-transparent' }}">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    {# Logo #}
+    <a href="{{ url_for('main.home') }}" class="flex items-center gap-2 shrink-0" aria-label="MovieMatch - Beranda">
+      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+        <svg class="w-4 h-4 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4zm2 0h1V9h-1v2zm1-4V5h-1v2h1zM5 5v2H4V5h1zm-1 4h1v2H4V9zm1 4H4v2h1v-2z" />
+        </svg>
+      </div>
+      <span class="text-lg font-black font-display text-foreground tracking-tight">Movie<span class="text-primary">Match</span></span>
     </a>
+
+    {# Desktop nav – disembunyikan di halaman auth #}
+    {%- if not is_auth_page %}
+    <nav class="hidden sm:flex items-center gap-1">
+      <a href="{{ url_for('main.home') }}" class="px-4 py-1.5 rounded-lg text-sm font-medium font-display transition-colors {{ link_active if page == 'main.home' else link_idle }}">Home</a>
+      <a href="{{ url_for('main.explore') }}" class="px-4 py-1.5 rounded-lg text-sm font-medium font-display transition-colors {{ link_active if page == 'main.explore' else link_idle }}">Explore</a>
+      <a href="{{ url_for('main.find_similar') }}"
+         class="ml-1 px-4 py-1.5 rounded-lg text-sm font-semibold font-display transition-all flex items-center gap-1.5 {{ 'bg-primary text-primary-foreground' if page == 'main.find_similar' else 'border border-primary/30 text-primary hover:bg-primary/10' }}">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+        Cari Film Serupa
+      </a>
+    </nav>
+    {%- endif %}
+
+    {# Sisi kanan #}
+    <div class="flex items-center gap-2">
+      {%- if not is_auth_page %}
+      {# Kotak cari desktop: tombol -> form kecil (navbar.js). Tanpa JS, tombol menuju Explore. #}
+      <a href="{{ url_for('main.explore') }}" data-search-open
+         class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-muted-foreground bg-muted/50 border border-border hover:border-primary/40 hover:text-foreground transition-all">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <span class="text-xs">Cari film...</span>
+      </a>
+      <form action="{{ url_for('main.explore') }}" method="get" data-search-form hidden
+            class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-primary/40">
+        <svg class="w-3.5 h-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" name="q" placeholder="Cari film..." aria-label="Cari film" autocomplete="off"
+               class="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-40">
+        <button type="button" data-search-close class="text-muted-foreground hover:text-foreground" aria-label="Tutup pencarian">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </form>
+      {%- endif %}
+
+      {%- if current_user %}
+      {# Sudah login: avatar + dropdown #}
+      <div class="relative" data-user-menu>
+        <button type="button" data-user-menu-button aria-haspopup="true" aria-expanded="false" aria-label="Menu pengguna"
+                class="hidden sm:flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-muted transition-colors">
+          {{ avatar(current_user.name) }}
+          <span class="text-sm font-semibold font-display text-foreground max-w-[100px] truncate">{{ current_user.name.split()[0] }}</span>
+          <svg data-user-menu-caret class="w-3.5 h-3.5 text-muted-foreground transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div data-user-menu-panel hidden
+             class="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-xl shadow-black/40 overflow-hidden fade-in z-50">
+          <div class="px-4 py-3 border-b border-border">
+            <p class="text-sm font-bold font-display text-foreground">{{ current_user.name }}</p>
+            <p class="text-xs text-muted-foreground truncate">{{ current_user.email }}</p>
+          </div>
+          <form method="post" action="{{ url_for('auth.logout') }}" class="p-1">
+            {%- if csrf_token is defined %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+            <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-secondary-foreground hover:bg-red-950/40 hover:text-red-300 transition-colors text-left">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Keluar
+            </button>
+          </form>
+        </div>
+      </div>
+      {%- else %}
+      {# Tamu: Masuk + Daftar #}
+      <div class="hidden sm:flex items-center gap-2">
+        <a href="{{ url_for('auth.login') }}"
+           class="px-4 py-1.5 rounded-lg text-sm font-semibold font-display transition-colors {{ 'text-primary bg-primary/10' if page == 'auth.login' else 'text-secondary-foreground border border-border hover:border-primary/40 hover:text-foreground' }}">Masuk</a>
+        <a href="{{ url_for('auth.register') }}"
+           class="px-4 py-1.5 rounded-lg text-sm font-bold font-display transition-all {{ 'bg-primary/80 text-primary-foreground' if page == 'auth.register' else 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95' }}">Daftar</a>
+      </div>
+      {%- endif %}
+
+      {%- if not is_auth_page %}
+      {# Cari mobile -> Explore #}
+      <a href="{{ url_for('main.explore') }}" aria-label="Cari film"
+         class="sm:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </a>
+      {%- endif %}
+
+      {# Hamburger mobile #}
+      <button type="button" data-mobile-toggle aria-expanded="false" aria-controls="mobile-menu" aria-label="Buka menu"
+              class="sm:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+        <svg data-icon-open class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg data-icon-close class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
   </div>
-</nav>
+
+  {# Menu mobile #}
+  <div id="mobile-menu" hidden class="sm:hidden bg-background/95 backdrop-blur-md border-b border-border px-4 py-3 flex flex-col gap-1 fade-in">
+    {%- if not is_auth_page %}
+    <a href="{{ url_for('main.home') }}" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium font-display transition-colors {{ link_active if page == 'main.home' else link_idle }}">Home</a>
+    <a href="{{ url_for('main.explore') }}" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium font-display transition-colors {{ link_active if page == 'main.explore' else link_idle }}">Explore</a>
+    <a href="{{ url_for('main.find_similar') }}"
+       class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold font-display transition-colors flex items-center gap-2 {{ 'text-primary bg-primary/10' if page == 'main.find_similar' else 'text-primary hover:bg-primary/10' }}">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+      Cari Film Serupa
+    </a>
+    <div class="my-1 border-t border-border"></div>
+    {%- endif %}
+
+    {%- if current_user %}
+    <div class="px-4 py-2 flex items-center gap-3">
+      {{ avatar(current_user.name) }}
+      <div>
+        <p class="text-sm font-bold font-display text-foreground">{{ current_user.name }}</p>
+        <p class="text-xs text-muted-foreground">{{ current_user.email }}</p>
+      </div>
+    </div>
+    <form method="post" action="{{ url_for('auth.logout') }}">
+      {%- if csrf_token is defined %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+      <button type="submit" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium font-display text-red-400 hover:bg-red-950/30 transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Keluar
+      </button>
+    </form>
+    {%- else %}
+    <div class="flex gap-2 px-1 pt-1">
+      <a href="{{ url_for('auth.login') }}" class="flex-1 py-2.5 text-center rounded-lg border border-border text-sm font-semibold font-display text-secondary-foreground hover:border-primary/40 hover:text-foreground transition-colors">Masuk</a>
+      <a href="{{ url_for('auth.register') }}" class="flex-1 py-2.5 text-center rounded-lg bg-primary text-primary-foreground text-sm font-bold font-display hover:bg-primary/90 transition-colors">Daftar</a>
+    </div>
+    {%- endif %}
+  </div>
+</header>

@@ -1,0 +1,107 @@
+{#- ============================================================================
+    partials/cards.html
+    Pemilik file: Frontend A (movie_card). recommendation_card milik Frontend B,
+    ditambahkan lewat PR terpisah di bawah file ini.
+    Sumber visual: figma-src/components/MovieCard.tsx
+
+    Pakai:
+      {% from 'partials/cards.html' import movie_card %}
+      {{ movie_card(movie) }}
+      {{ movie_card(movie, similarity=movie.similarity) }}
+      {{ movie_card(movie, action_label='Pilih sebagai Acuan',
+                    action_url=url_for('main.find_similar', acuan=movie.id)) }}
+============================================================================ -#}
+{% from 'partials/badges.html' import rating_badge, genre_badge, similarity_badge %}
+
+
+{#- ---------------------------------------------------------------------------
+    movie_card(movie, similarity=None, href=None, action_label=None, action_url=None, index=None, delay_step=40)
+
+    movie (dict, kontrak model PRD §10 + poster_url dari backend):
+      id, title, release_year, genres (list), director, vote_average, vote_count,
+      overview (tidak ditampilkan di kartu), poster_url (boleh None/kosong)
+    similarity   : float 0–1 (opsional) -> badge "% Mirip" kiri atas
+    href         : link kartu; default url_for('main.movie_detail', movie_id=movie.id)
+    action_label : teks tombol di bawah kartu, mis. "Pilih sebagai Acuan" / "Pilih"
+    action_url   : tujuan tombol tsb (mis. /cari-serupa?acuan=<id>)
+    index        : [Usulan] urutan di grid (loop.index0) -> animation-delay index*delay_step ms
+    delay_step   : [Usulan] jeda stagger per kartu (Explore 40ms, Beranda 60ms seperti source)
+--------------------------------------------------------------------------- -#}
+{% macro movie_card(movie, similarity=None, href=None, action_label=None, action_url=None, index=None, delay_step=40) -%}
+{%- set link = href or url_for('main.movie_detail', movie_id=movie.id) -%}
+{%- set title = movie.title or 'Tanpa Judul' -%}
+{%- set initials = (title.split()[:2] | map('first') | join | upper) -%}
+{%- set director = (movie.director or '').split(',')[0] | trim -%}
+{%- set meta = [movie.release_year, director] | select | join(' · ') -%}
+<div{% if index is not none %} class="fade-in-up" style="animation-delay: {{ index * delay_step }}ms"{% endif %}>
+  <a href="{{ link }}"
+     class="group relative block bg-card border border-border rounded-xl overflow-hidden cursor-pointer hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/40 transition-all duration-300{% if index is none %} fade-in-up{% endif %}"
+     aria-label="{{ title }}{% if movie.release_year %} ({{ movie.release_year }}){% endif %}">
+    {#- Poster -#}
+    <div class="aspect-[2/3] bg-muted overflow-hidden relative">
+      {%- if movie.poster_url %}
+      <img src="{{ movie.poster_url }}" alt="Poster {{ title }}" loading="lazy" data-poster
+           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+      {%- endif %}
+      {#- Fallback inisial: tampil langsung jika poster_url kosong; jika ada, disembunyikan
+          dan dimunculkan oleh poster.js saat gambar gagal dimuat. -#}
+      <div data-poster-fallback
+           class="{% if movie.poster_url %}hidden {% endif %}w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-muted to-secondary gap-3">
+        <div class="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <span class="text-xl font-black font-display text-primary">{{ initials }}</span>
+        </div>
+        <p class="text-xs text-muted-foreground text-center px-4 leading-tight">{{ title }}</p>
+      </div>
+
+      {#- Overlay hover "Lihat Detail" (CSS group-hover, tanpa JS). <span>, bukan <button>,
+          karena seluruh kartu sudah berupa <a>. -#}
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300 flex items-end p-3">
+        <span class="w-full py-2 bg-primary text-primary-foreground text-xs font-bold font-display rounded-lg text-center hover:bg-primary/90 transition-colors">
+          Lihat Detail
+        </span>
+      </div>
+
+      {#- Rating TMDB kanan atas -#}
+      <div class="absolute top-2 right-2 bg-black/70 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+        {{ rating_badge(movie.vote_average, size='sm') }}
+      </div>
+
+      {#- Badge kemiripan kiri atas, hanya jika similarity diberikan -#}
+      {%- if similarity is not none %}
+      <div class="absolute top-2 left-2">
+        {{ similarity_badge(similarity, size='sm') }}
+      </div>
+      {%- endif %}
+    </div>
+
+    {#- Info -#}
+    <div class="p-3 space-y-1.5">
+      <h3 class="text-sm font-bold font-display text-foreground line-clamp-2 leading-snug">{{ title }}</h3>
+      {%- if meta %}
+      <p class="text-xs text-muted-foreground">{{ meta }}</p>
+      {%- endif %}
+      {%- if movie.genres %}
+      <div class="flex flex-wrap gap-1 pt-0.5">
+        {%- for g in movie.genres[:2] %}
+        {{ genre_badge(g, size='sm') }}
+        {%- endfor %}
+      </div>
+      {%- endif %}
+    </div>
+  </a>
+  {%- if action_label and action_url %}
+  <div class="mt-2">
+    <a href="{{ action_url }}"
+       class="block w-full py-1.5 text-center bg-primary/10 border border-primary/30 text-primary text-xs font-bold font-display rounded-lg hover:bg-primary/20 transition-colors">
+      {{ action_label }}
+    </a>
+  </div>
+  {%- endif %}
+</div>
+{%- endmacro %}
+
+
+{#- ===========================================================================
+    recommendation_card(movie, source_movie_id)   >>> PEMILIK: FRONTEND B <<<
+    Belum dibuat. Tambahkan di sini lewat PR terpisah (jinja-components.md §4).
+=========================================================================== -#}

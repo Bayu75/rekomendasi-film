@@ -1,4 +1,21 @@
-{# Frontend A: ganti dengan footer lengkap sesuai desain #}
-<footer class="border-t border-border py-6 text-center text-sm text-muted-foreground">
-  &copy; 2026 MovieMatch &middot; Sistem Rekomendasi Film
+{#- partials/footer.html (pemilik: Frontend A) – sumber: figma-src/components/Footer.tsx -#}
+<footer class="border-t border-border bg-card/50 mt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+    <a href="{{ url_for('main.home') }}" class="flex items-center gap-2" aria-label="MovieMatch - Beranda">
+      <div class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+        <svg class="w-3.5 h-3.5 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4zm2 0h1V9h-1v2zm1-4V5h-1v2h1zM5 5v2H4V5h1zm-1 4h1v2H4V9zm1 4H4v2h1v-2z" />
+        </svg>
+      </div>
+      <span class="font-black font-display text-foreground">Movie<span class="text-primary">Match</span></span>
+    </a>
+
+    <nav class="flex items-center gap-6">
+      <a href="{{ url_for('main.home') }}" class="text-sm text-muted-foreground hover:text-foreground transition-colors font-display">Home</a>
+      <a href="{{ url_for('main.explore') }}" class="text-sm text-muted-foreground hover:text-foreground transition-colors font-display">Explore</a>
+      <a href="{{ url_for('main.find_similar') }}" class="text-sm text-muted-foreground hover:text-foreground transition-colors font-display">Cari Film Serupa</a>
+    </nav>
+
+    <p class="text-xs text-muted-foreground text-center">Sistem rekomendasi film berbasis kemiripan konten.</p>
+  </div>
 </footer>

@@ -9,3 +9,9 @@ models/*
 !models/.gitkeep
 .ipynb_checkpoints/
 .DS_Store
+
+# Biner Tailwind CLI (unduh lokal) dan artefak yang tidak di-commit
+tools/tailwindcss
+tools/tailwindcss.exe
+node_modules/
+screenshots/

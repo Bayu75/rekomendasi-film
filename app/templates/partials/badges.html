@@ -1,0 +1,83 @@
+{#- ============================================================================
+    partials/badges.html
+    Pemilik file: Frontend A. Macro B (similarity_badge) masuk lewat PR terpisah.
+    Sumber visual: figma-src/components/GenreBadge.tsx, RatingBadge.tsx, SimilarityBadge.tsx
+
+    Pakai:
+      {% from 'partials/badges.html' import genre_badge, rating_badge, similarity_badge %}
+
+    Butuh Jinja global GENRE_STYLES + GENRE_DEFAULT_STYLE (app/genre_styles.py ->
+    register_template_globals). Global, bukan context_processor, supaya terlihat dari macro
+    yang di-import.
+============================================================================ -#}
+
+
+{#- ---------------------------------------------------------------------------
+    genre_badge(genre, size='sm')            [A]
+    genre : nama genre seperti di CSV (mis. "Science Fiction")
+    size  : 'sm' (kartu) | 'md' (Detail, konfirmasi)
+--------------------------------------------------------------------------- -#}
+{% macro genre_badge(genre, size='sm') -%}
+{%- set color = GENRE_STYLES.get(genre, GENRE_DEFAULT_STYLE) -%}
+{%- if size == 'md' %}{% set size_class = 'px-3 py-1 text-xs' %}{% else %}{% set size_class = 'px-2.5 py-0.5 text-[11px]' %}{% endif -%}
+<span class="inline-flex items-center border rounded-full font-medium font-display leading-tight {{ color }} {{ size_class }}">{{ genre }}</span>
+{%- endmacro %}
+
+
+{#- ---------------------------------------------------------------------------
+    rating_badge(rating, size='sm', show_label=False)     [A]
+    rating     : vote_average (float, Rating TMDB, skala 0–10). None -> "–"
+    size       : 'sm' | 'md' | 'lg'
+    show_label : True -> tambahkan teks "Rating TMDB" (isu #2 PRD: bukan "IMDb") [Usulan]
+--------------------------------------------------------------------------- -#}
+{% macro rating_badge(rating, size='sm', show_label=False) -%}
+{%- if size == 'lg' %}{% set star_size = 'w-4 h-4' %}{% set text_size = 'text-base' %}
+{%- elif size == 'md' %}{% set star_size = 'w-3.5 h-3.5' %}{% set text_size = 'text-sm' %}
+{%- else %}{% set star_size = 'w-3 h-3' %}{% set text_size = 'text-xs' %}{% endif -%}
+{%- set value = ('%.1f' | format(rating)) if rating is not none else '–' -%}
+<span class="inline-flex items-center gap-1 font-display font-semibold {{ text_size }}" title="Rating TMDB" aria-label="Rating TMDB {{ value }}">
+  <svg class="{{ star_size }} text-primary fill-primary shrink-0" viewBox="0 0 20 20" aria-hidden="true">
+    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+  </svg>
+  <span class="text-primary">{{ value }}</span>
+  {%- if show_label %}<span class="text-muted-foreground font-medium">Rating TMDB</span>{% endif %}
+</span>
+{%- endmacro %}
+
+
+{#- ===========================================================================
+    similarity_badge(similarity, size='sm')
+    >>> STUB SEMENTARA – PEMILIK: FRONTEND B <<<
+    Dibuat Frontend A hanya supaya movie_card bisa dirender (jinja-components.md §4,
+    "Ketergantungan"). Nama + parameter sudah sesuai kontrak; Frontend B silakan
+    mengganti isi macro ini lewat PR terpisah.
+    similarity : float 0–1 dari model -> score = (similarity*100)|round|int
+    Ambang warna ≥80 / ≥60 masih dari desain dummy; final menunggu isu #14 (Bayu/model).
+=========================================================================== -#}
+{% macro similarity_badge(similarity, size='sm') -%}
+{%- set score = (similarity * 100) | round | int -%}
+{%- if score >= 80 %}{% set c = 'bg-primary/15 text-primary border-primary/30' %}{% set t = 'text-primary' %}
+{%- elif score >= 60 %}{% set c = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' %}{% set t = 'text-emerald-400' %}
+{%- else %}{% set c = 'bg-zinc-700/30 text-zinc-400 border-zinc-600/40' %}{% set t = 'text-zinc-400' %}{% endif -%}
+{%- if size == 'lg' %}
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border {{ c }}">
+  <div class="relative w-8 h-8">
+    <svg class="w-8 h-8 -rotate-90" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2.5" class="text-border" />
+      <circle cx="16" cy="16" r="13" fill="none" stroke-width="2.5" stroke="currentColor"
+              stroke-dasharray="{{ score / 100 * 81.7 }} 81.7" stroke-linecap="round" class="{{ t }}" />
+    </svg>
+    <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold font-display {{ t }}">{{ score }}</span>
+  </div>
+  <div>
+    <p class="text-sm font-bold font-display {{ t }}">{{ score }}% Mirip</p>
+    <p class="text-[11px] text-muted-foreground">Kemiripan konten</p>
+  </div>
+</div>
+{%- else %}
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-bold font-display {{ c }}">
+  <span class="w-1.5 h-1.5 rounded-full bg-current opacity-80 shrink-0"></span>
+  {{ score }}% Mirip
+</span>
+{%- endif %}
+{%- endmacro %}

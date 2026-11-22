@@ -1,4 +1,95 @@
-/* Dipakai nanti saat pindah dari CDN ke Tailwind CLI.
-   Token lengkap: lihat docs/design-system.md */
-@import "tailwindcss";
+/* MovieMatch – Tailwind v4 entry (milik Frontend A).
+   Token disalin dari figma-src/index.css + design-system.md.
+   Build: lihat README.md  ->  app/static/css/app.css */
+
+/* source(none): matikan auto-detect agar Tailwind tidak memindai venv/tools; semua sumber didaftar manual */
+@import 'tailwindcss' source(none);
+
 @source "../../templates";
+@source "../js";
+@source "../../genre_styles.py"; /* GENRE_STYLES: kelas genre yang dipilih dinamis di Jinja */
+
+/* Kelas yang dirangkai dinamis di macro (ambang similarity_badge, ukuran badge) didaftarkan
+   eksplisit sebagai jaring pengaman, walau saat ini juga tertulis utuh di template. */
+@source inline("skeleton fade-in fade-in-up bg-primary/15 text-primary border-primary/30 bg-emerald-500/10 text-emerald-400 border-emerald-500/25 bg-zinc-700/30 text-zinc-400 border-zinc-600/40");
+
+@theme {
+  --color-background: #09090C;
+  --color-foreground: #F0F0F5;
+  --color-card: #111116;
+  --color-card-foreground: #E0E0E8;
+  --color-primary: #F5C518;
+  --color-primary-foreground: #09090C;
+  --color-secondary: #1C1C24;
+  --color-secondary-foreground: #A8A8B8;
+  --color-muted: #18181F;
+  --color-muted-foreground: #6E6E80;
+  --color-accent: #F5C518;
+  --color-accent-foreground: #09090C;
+  --color-border: #252530;
+  --color-ring: #F5C518;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #09090C;
+    color: #F0F0F5;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Tailwind v4 preflight membuat <button> cursor default; desain memakai pointer */
+  button:not(:disabled), [role="button"] {
+    cursor: pointer;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2A2A38; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3A3A50; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@utility skeleton {
+  background: linear-gradient(90deg, #18181F 25%, #23232E 50%, #18181F 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* fill-mode "both": kartu tetap tersembunyi selama animation-delay (stagger 40ms) */
+@utility fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+@utility fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+/* line-clamp-2/3/4 sudah bawaan Tailwind v4 (utility line-clamp-*), jadi tidak didefinisikan ulang. */
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up, .fade-in { animation: none; }
+}

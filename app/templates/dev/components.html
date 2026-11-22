@@ -1,0 +1,71 @@
+{#- Halaman DEV: pratinjau komponen Frontend A dengan data dummy. Tidak dipakai di produksi. -#}
+{% extends 'base.html' %}
+{% from 'partials/cards.html' import movie_card %}
+{% from 'partials/badges.html' import genre_badge, rating_badge, similarity_badge %}
+{% block title %}Demo Komponen – MovieMatch (dev){% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 pt-24">
+
+  <header class="mb-10">
+    <p class="text-xs font-semibold font-display uppercase tracking-widest text-primary mb-2">Frontend A · Langkah 1</p>
+    <h1 class="text-3xl sm:text-4xl font-black font-display text-foreground mb-2">Demo Komponen</h1>
+    <p class="text-sm leading-relaxed text-secondary-foreground max-w-2xl">
+      Pratinjau <code class="text-primary">movie_card</code>, <code class="text-primary">genre_badge</code>, <code class="text-primary">rating_badge</code>,
+      dan stub <code class="text-primary">similarity_badge</code> (milik Frontend B) dengan data dummy berformat kontrak model.
+      {% if current_user %}<a href="?login=0" class="text-primary font-semibold">Simulasi tamu →</a>{% else %}<a href="?login=1" class="text-primary font-semibold">Simulasi login →</a>{% endif %}
+    </p>
+  </header>
+
+  {# 1. Grid kartu tanpa similarity (Explore / Jelajahi Film) #}
+  <section class="mb-16">
+    <h2 class="text-lg font-bold font-display text-foreground mb-1">movie_card(movie)</h2>
+    <p class="text-xs text-muted-foreground mb-5">Grid Explore: <code>grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4</code>. Kartu 3 = poster None, kartu 5 = URL rusak (poster.js), kartu 9 = data kosong.</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {% for m in movies %}{{ movie_card(m, index=loop.index0) }}{% endfor %}
+    </div>
+  </section>
+
+  {# 2. Dengan similarity (Rekomendasi Untukmu / hasil Cari Film Serupa) #}
+  <section class="mb-16">
+    <h2 class="text-lg font-bold font-display text-foreground mb-1">movie_card(movie, similarity=movie.similarity)</h2>
+    <p class="text-xs text-muted-foreground mb-5">Badge "% Mirip" = round(similarity × 100). Ambang warna ≥80 kuning / ≥60 hijau / lainnya abu (sementara, isu #14).</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {% for m in movies if m.similarity is defined %}{% if loop.index <= 5 %}{{ movie_card(m, similarity=m.similarity, index=loop.index0) }}{% endif %}{% endfor %}
+    </div>
+  </section>
+
+  {# 3. Dengan tombol aksi (Cari Film Serupa langkah 1) #}
+  <section class="mb-16">
+    <h2 class="text-lg font-bold font-display text-foreground mb-1">movie_card(movie, action_label=…, action_url=…)</h2>
+    <p class="text-xs text-muted-foreground mb-5">Tombol "Pilih sebagai Acuan" di bawah kartu, menuju <code>/cari-serupa?acuan=&lt;id&gt;</code>.</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {% for m in movies[:5] %}{{ movie_card(m, action_label='Pilih sebagai Acuan', action_url=url_for('main.find_similar', acuan=m.id), index=loop.index0) }}{% endfor %}
+    </div>
+  </section>
+
+  {# 4. Badge #}
+  <section class="mb-4 grid gap-6 lg:grid-cols-2">
+    <div class="rounded-xl bg-card border border-border p-5">
+      <h2 class="text-lg font-bold font-display text-foreground mb-1">genre_badge – 20 genre CSV</h2>
+      <p class="text-xs text-muted-foreground mb-4">Sesuai isu #13: "Science Fiction" memakai warna Sci-Fi; Documentary, Family, Foreign, TV Movie memakai default.</p>
+      <div class="flex flex-wrap gap-1.5 mb-4">{% for g in ALL_GENRES %}{{ genre_badge(g) }}{% endfor %}</div>
+      <div class="flex flex-wrap gap-1.5">{% for g in ALL_GENRES[:6] %}{{ genre_badge(g, size='md') }}{% endfor %}</div>
+    </div>
+    <div class="rounded-xl bg-card border border-border p-5 space-y-4">
+      <div>
+        <h2 class="text-lg font-bold font-display text-foreground mb-3">rating_badge (Rating TMDB)</h2>
+        <div class="flex flex-wrap items-center gap-5">
+          {{ rating_badge(8.2) }} {{ rating_badge(8.2, size='md') }} {{ rating_badge(8.2, size='lg') }} {{ rating_badge(8.2, size='md', show_label=True) }} {{ rating_badge(None) }}
+        </div>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold font-display text-foreground mb-1">similarity_badge <span class="text-xs font-semibold text-muted-foreground">(STUB · milik Frontend B)</span></h2>
+        <div class="flex flex-wrap items-center gap-3 mt-3">
+          {{ similarity_badge(0.85) }} {{ similarity_badge(0.64) }} {{ similarity_badge(0.23) }} {{ similarity_badge(0.53, size='lg') }}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
