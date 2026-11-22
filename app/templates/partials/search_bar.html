@@ -1,0 +1,27 @@
+{#- Kotak pencarian. Pemilik: Frontend A. JS: static/js/search_bar.js -#}
+{% macro search_bar(action, value='', placeholder='Cari judul film...', size='md', autofocus=False, extra_params={}, name='q') -%}
+{%- set is_lg = size == 'lg' -%}
+<form action="{{ action }}" method="get" role="search" class="w-full" data-search-bar>
+  {%- for k, v in extra_params.items() if v %}
+  <input type="hidden" name="{{ k }}" value="{{ v }}">
+  {%- endfor %}
+  <div class="flex items-center gap-2 bg-card border border-border rounded-xl focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all {{ 'px-5 py-4' if is_lg else 'px-4 py-3' }}">
+    <svg class="shrink-0 text-muted-foreground {{ 'w-5 h-5' if is_lg else 'w-4 h-4' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <input type="text" name="{{ name }}" value="{{ value or '' }}" placeholder="{{ placeholder }}" aria-label="{{ placeholder }}"
+           autocomplete="off"{% if autofocus %} autofocus{% endif %} data-search-input
+           class="flex-1 min-w-0 bg-transparent text-foreground placeholder:text-muted-foreground outline-none {{ 'text-base' if is_lg else 'text-sm' }}">
+    <button type="button" data-search-clear{% if not value %} hidden{% endif %}
+            class="text-muted-foreground hover:text-foreground transition-colors shrink-0" aria-label="Hapus">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <button type="submit"
+            class="shrink-0 bg-primary text-primary-foreground font-semibold font-display rounded-lg hover:bg-primary/90 active:scale-95 transition-all {{ 'px-5 py-2.5 text-sm' if is_lg else 'px-4 py-1.5 text-xs' }}">
+      Cari
+    </button>
+  </div>
+</form>
+{%- endmacro %}

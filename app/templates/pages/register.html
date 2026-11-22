@@ -1,0 +1,84 @@
+{#- Halaman Daftar. Pemilik: Frontend A. Route: GET, POST /daftar (auth.register) -#}
+{% extends 'base.html' %}
+{% from 'partials/auth.html' import auth_shell, form_alert, csrf_field, eye_toggle, submit_button, field_icon, ICON_USER, ICON_MAIL, ICON_LOCK, ICON_SHIELD %}
+{% block title %}Daftar – MovieMatch{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+{% call auth_shell() %}
+  <div class="mb-6">
+    <h1 class="text-2xl font-black font-display text-foreground mb-1">Buat Akun</h1>
+    <p class="text-sm text-muted-foreground">
+      Sudah punya akun?
+      <a href="{{ url_for('auth.login') }}" class="text-primary font-semibold hover:text-primary/80 transition-colors">Masuk di sini</a>
+    </p>
+  </div>
+
+  <form method="post" action="{{ url_for('auth.register') }}" class="space-y-4" novalidate data-auth-form="register">
+    {{ csrf_field() }}
+    <div>
+      <label for="name" class="block text-xs font-semibold font-display text-secondary-foreground mb-1.5">Nama Lengkap</label>
+      <div class="flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-3 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+        {{ field_icon(ICON_USER) }}
+        <input id="name" name="name" type="text" value="{{ name or '' }}" placeholder="Nama kamu" autocomplete="name"
+               class="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none">
+      </div>
+    </div>
+
+    <div>
+      <label for="email" class="block text-xs font-semibold font-display text-secondary-foreground mb-1.5">Email</label>
+      <div class="flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-3 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+        {{ field_icon(ICON_MAIL) }}
+        <input id="email" name="email" type="email" value="{{ email or '' }}" placeholder="email@contoh.com" autocomplete="email"
+               class="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none">
+      </div>
+    </div>
+
+    <div>
+      <label for="password" class="block text-xs font-semibold font-display text-secondary-foreground mb-1.5">Kata Sandi</label>
+      <div class="flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-3 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+        {{ field_icon(ICON_LOCK) }}
+        <input id="password" name="password" type="password" placeholder="Min. 6 karakter" autocomplete="new-password" data-strength-source
+               class="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none">
+        {{ eye_toggle('password') }}
+      </div>
+
+      <div class="mt-2 space-y-1" data-strength hidden>
+        <div class="flex gap-1">
+          <div class="h-1 flex-1 rounded-full transition-all bg-border" data-strength-bar></div>
+          <div class="h-1 flex-1 rounded-full transition-all bg-border" data-strength-bar></div>
+          <div class="h-1 flex-1 rounded-full transition-all bg-border" data-strength-bar></div>
+        </div>
+        <p class="text-[11px] text-muted-foreground font-display">
+          Kekuatan kata sandi: <span class="text-foreground" data-strength-label></span>
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <label for="confirm_password" class="block text-xs font-semibold font-display text-secondary-foreground mb-1.5">Konfirmasi Kata Sandi</label>
+      <div data-confirm-box
+           class="flex items-center gap-2 bg-secondary border rounded-xl px-4 py-3 focus-within:ring-1 transition-all border-border focus-within:border-primary/50 focus-within:ring-primary/20">
+        {{ field_icon(ICON_SHIELD) }}
+        <input id="confirm_password" name="confirm_password" type="password" placeholder="Ulangi kata sandi" autocomplete="new-password" data-confirm-input
+               class="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none">
+        {{ eye_toggle('confirm_password') }}
+        <div class="shrink-0" data-confirm-icon hidden>
+          <svg data-confirm-ok class="w-4 h-4 text-emerald-500 hidden" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <svg data-confirm-bad class="w-4 h-4 text-red-500 hidden" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    {{ form_alert(error, js_slot=True) }}
+
+    {{ submit_button('Buat Akun', 'Membuat akun...') }}
+  </form>
+{% endcall %}
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/auth_form.js') }}" defer></script>{% endblock %}
