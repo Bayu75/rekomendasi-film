@@ -35,6 +35,8 @@ chmod +x tools/tailwindcss
 
 ## Menjalankan
 
+Pin di `requirements.txt` membutuhkan **Python >= 3.11**. Banyak paket yang sudah dipin tim mensyaratkan `>=3.11` atau `>=3.12`; pada Python yang lebih lama pip melewatkan versi itu (`No matching distribution`) dan instalasi gagal. Gunakan Python 3.11 atau 3.12.
+
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt

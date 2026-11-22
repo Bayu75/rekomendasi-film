@@ -3,6 +3,8 @@
 Sistem rekomendasi film content-based (TF-IDF + cosine similarity) dengan Flask, Jinja, Tailwind, dan MySQL. Dataset: Kaggle The Movies Dataset.
 
 ## Menjalankan
+Butuh **Python >= 3.11**. Pin di `requirements.txt` (milik tim) banyak yang mensyaratkan `>=3.11` atau `>=3.12`; pada Python yang lebih lama pip melewatkan versi itu dan instalasi gagal.
+
 1. `python -m venv .venv` lalu aktifkan (`.venv\Scripts\activate` di Windows, `source .venv/bin/activate` di Linux/macOS)
 2. `pip install -r requirements.txt`
 3. Salin `.env.example` menjadi `.env` lalu isi nilainya
