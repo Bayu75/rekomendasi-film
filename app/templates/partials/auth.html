@@ -1,0 +1,88 @@
+{#- Macro bersama halaman Masuk & Daftar. Pemilik: Frontend A. JS: static/js/auth_form.js -#}
+
+{% macro csrf_field() -%}
+{%- if csrf_token is defined %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif -%}
+{%- endmacro %}
+
+{% macro auth_shell() -%}
+<div class="min-h-screen bg-background flex items-center justify-center px-4 py-16 relative overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_40%,rgba(245,197,24,0.06)_0%,transparent_70%)]"></div>
+    <div class="absolute inset-0 opacity-[0.02]"
+         style="background-image: radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px); background-size: 32px 32px;"></div>
+  </div>
+
+  <div class="relative z-10 w-full max-w-md fade-in">
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+        <svg class="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4zm2 0h1V9h-1v2zm1-4V5h-1v2h1zM5 5v2H4V5h1zm-1 4h1v2H4V9zm1 4H4v2h1v-2z" />
+        </svg>
+      </div>
+      <span class="text-2xl font-black font-display text-foreground tracking-tight">Movie<span class="text-primary">Match</span></span>
+    </div>
+
+    <div class="bg-card border border-border rounded-2xl p-8 shadow-2xl shadow-black/40">
+      {{ caller() }}
+    </div>
+
+    <p class="text-center text-xs text-muted-foreground mt-6">
+      <a href="{{ url_for('main.home') }}" class="hover:text-foreground transition-colors">← Kembali ke Beranda</a>
+    </p>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro form_alert(message, kind='error', js_slot=False) -%}
+{%- if kind == 'success' %}
+<div class="flex items-center gap-2 p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40 fade-in" role="status">
+  <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+  </svg>
+  <p class="text-xs text-emerald-300">{{ message }}</p>
+</div>
+{%- else %}
+<div class="flex items-center gap-2 p-3 rounded-xl bg-red-950/40 border border-red-800/40 fade-in" role="alert"
+     {%- if js_slot %} data-form-error{% endif %}{% if not message %} hidden{% endif %}>
+  <svg class="w-4 h-4 text-red-400 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+  </svg>
+  <p class="text-xs text-red-300"{% if js_slot %} data-form-error-text{% endif %}>{{ message or '' }}</p>
+</div>
+{%- endif %}
+{%- endmacro %}
+
+{% macro eye_toggle(target_id) -%}
+<button type="button" data-toggle-password="{{ target_id }}" aria-label="Tampilkan" aria-pressed="false"
+        class="text-muted-foreground hover:text-foreground transition-colors">
+  <svg data-eye-closed class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+  </svg>
+  <svg data-eye-open class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  </svg>
+</button>
+{%- endmacro %}
+
+{% macro submit_button(label, loading_label) -%}
+<button type="submit" data-submit data-label="{{ label }}" data-loading-label="{{ loading_label }}"
+        class="w-full py-3 bg-primary text-primary-foreground font-bold font-display rounded-xl hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2">
+  <svg data-spinner class="w-4 h-4 animate-spin hidden" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+  </svg>
+  <span data-submit-label>{{ label }}</span>
+</button>
+{%- endmacro %}
+
+{% set ICON_USER = 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' %}
+{% set ICON_MAIL = 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' %}
+{% set ICON_LOCK = 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' %}
+{% set ICON_SHIELD = 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' %}
+
+{% macro field_icon(path) -%}
+<svg class="w-4 h-4 text-muted-foreground shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ path }}" />
+</svg>
+{%- endmacro %}
