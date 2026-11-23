@@ -1,0 +1,68 @@
+{#- Halaman Masuk. Pemilik: Frontend A. Route: GET, POST /masuk (auth.login) -#}
+{% extends 'base.html' %}
+{% from 'partials/auth.html' import auth_shell, form_alert, csrf_field, eye_toggle, submit_button, field_icon, ICON_MAIL, ICON_LOCK %}
+{% block title %}Masuk – MovieMatch{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+{% call auth_shell() %}
+  <div class="mb-6">
+    <h1 class="text-2xl font-black font-display text-foreground mb-1">Masuk</h1>
+    <p class="text-sm text-muted-foreground">
+      Belum punya akun?
+      <a href="{{ url_for('auth.register') }}" class="text-primary font-semibold hover:text-primary/80 transition-colors">Daftar sekarang</a>
+    </p>
+  </div>
+
+  {%- for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="mb-6">{{ form_alert(message, 'success' if category == 'success' else 'error') }}</div>
+  {%- endfor %}
+
+  {%- if show_demo_hint %}
+  <div class="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/15 mb-6">
+    <svg class="w-4 h-4 text-primary shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+    </svg>
+    <div class="flex-1 min-w-0">
+      <p class="text-xs text-secondary-foreground leading-relaxed">
+        <span class="font-semibold text-foreground">Demo:</span>
+        <code class="text-primary font-mono text-[11px]">{{ demo_email }}</code> /
+        <code class="text-primary font-mono text-[11px]">{{ demo_password }}</code>
+      </p>
+    </div>
+    <button type="button" data-fill-demo data-demo-email="{{ demo_email }}" data-demo-password="{{ demo_password }}"
+            class="text-[11px] font-bold font-display text-primary whitespace-nowrap hover:text-primary/80 transition-colors">
+      Isi Otomatis
+    </button>
+  </div>
+  {%- endif %}
+
+  <form method="post" action="{{ url_for('auth.login') }}" class="space-y-4" novalidate data-auth-form="login">
+    {{ csrf_field() }}
+    <div>
+      <label for="email" class="block text-xs font-semibold font-display text-secondary-foreground mb-1.5">Email</label>
+      <div class="flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-3 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+        {{ field_icon(ICON_MAIL) }}
+        <input id="email" name="email" type="email" value="{{ email or '' }}" placeholder="email@contoh.com" autocomplete="email"
+               class="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none">
+      </div>
+    </div>
+
+    <div>
+      <label for="password" class="block text-xs font-semibold font-display text-secondary-foreground mb-1.5">Kata Sandi</label>
+      <div class="flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-3 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+        {{ field_icon(ICON_LOCK) }}
+        <input id="password" name="password" type="password" placeholder="Kata sandi kamu" autocomplete="current-password"
+               class="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none">
+        {{ eye_toggle('password') }}
+      </div>
+    </div>
+
+    {{ form_alert(error, js_slot=True) }}
+
+    {{ submit_button('Masuk', 'Memverifikasi...') }}
+  </form>
+{% endcall %}
+{% endblock %}
+
+{% block scripts %}<script src="{{ url_for('static', filename='js/auth_form.js') }}" defer></script>{% endblock %}
