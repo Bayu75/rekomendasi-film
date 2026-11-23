@@ -1,0 +1,29 @@
+{
+  "name": "rekomendasi-film",
+  "version": "1.0.0",
+  "description": "Sistem rekomendasi film content-based (TF-IDF + cosine similarity) dengan Flask, Jinja, Tailwind, dan MySQL. Dataset: Kaggle The Movies Dataset.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bayu75/rekomendasi-film.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Bayu75/rekomendasi-film/issues"
+  },
+  "homepage": "https://github.com/Bayu75/rekomendasi-film#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.5",
+    "tailwindcss": "^4.3.5"
+  }
+}
