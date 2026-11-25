@@ -1,0 +1,603 @@
+
+{% extends "base.html" %}
+
+{% from 'partials/badges.html' import rating_badge, genre_badge %}
+
+{% block title %}{{ movie.title }} - MovieMatch{% endblock %}
+
+{% block content %}
+<section class="min-h-screen bg-background">
+  <div class="max-w-7xl mx-auto px-6 pb-16"
+     style="padding-top: 100px;">
+
+    <!-- Tombol Kembali -->
+    <a href="{{ url_for('main.explore') }}"
+       class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8">
+      <span>‹</span> Kembali
+    </a>
+
+    <!-- Informasi Utama Film -->
+    <div style="display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 32px; align-items: start;">
+
+      <!-- Poster -->
+      <div style="width: 290px; max-width: 100%;">
+        <div class="rounded-2xl overflow-hidden bg-card border border-border"
+            style="width: 100%; aspect-ratio: 2 / 3;">
+          {% if movie.poster_url %}
+          <img src="{{ movie.poster_url }}"
+               alt="Poster {{ movie.title }}"
+               class="w-full h-full object-cover">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center text-primary text-4xl font-bold">
+            {{ movie.title[:2] }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      
+    <!-- Detail Film -->
+    <div style="display: flex; flex-direction: column; align-items: flex-start; padding-top: 0;">
+
+    <!-- Genre -->
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;">
+        {% for genre in movie.genres %}
+        {{ genre_badge(genre) }}
+        {% endfor %}
+    </div>
+
+    <!-- Judul -->
+    <h1 class="font-black font-display text-foreground"
+        style="font-size: 48px; line-height: 1.15; margin: 0 0 14px 0;">
+        {{ movie.title }}
+    </h1>
+
+    <!-- Tahun, Durasi, Rating -->
+    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 30px; margin-bottom: 36px; font-size: 16px; font-weight: 700;">
+        <span class="text-foreground">{{ movie.release_year }}</span>
+        <span class="text-muted-foreground">{{ movie.duration }}</span>
+        <span class="text-primary">★ {{ movie.vote_average }}</span>
+    </div>
+
+    <!-- Informasi Singkat -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; width: 100%; margin-bottom: 34px;">
+
+        <div>
+            <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Sutradara</p>
+            <p class="text-foreground font-bold" style="font-size: 16px;">{{ movie.director }}</p>
+        </div>
+
+        <div>
+            <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Durasi</p>
+            <p class="text-foreground font-bold" style="font-size: 16px;">{{ movie.duration }}</p>
+        </div>
+
+        <div>
+            <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Rating</p>
+            <p class="text-foreground font-bold" style="font-size: 16px;">{{ movie.vote_average }}/10</p>
+        </div>
+
+    </div>
+
+    <!-- Tombol -->
+    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+
+    <a href="{{ url_for('main.find_similar') }}"
+        style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-width: 198px; height: 50px; padding: 0 24px; background: #F5C518; color: #09090C; font-size: 16px; font-weight: 700; border-radius: 12px; text-decoration: none; transition: background 0.2s;">
+        ✨ Cari Film Serupa
+    </a>
+
+    <a href="{{ url_for('main.explore') }}"
+        style="display: inline-flex; align-items: center; justify-content: center; min-width: 178px; height: 50px; padding: 0 24px; background: #1A1A20; color: #A1A1AA; border: 1px solid #292932; font-size: 16px; font-weight: 600; border-radius: 12px; text-decoration: none; transition: all 0.2s;">
+        Cari Film Lainnya
+    </a>
+
+    </div>
+
+    </div>
+
+    </div>
+
+    
+    
+    <!-- Sinopsis, Pemeran, dan Informasi Film -->
+    <style>
+    .detail-lower {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 48px;
+        align-items: start;
+        margin-top: 48px;
+    }
+
+    .detail-left {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        min-width: 0;
+    }
+
+    .detail-heading {
+        font-size: 20px;
+        font-weight: 800;
+        color: #f4f4f5;
+        border-left: 4px solid #f5c518;
+        padding-left: 12px;
+        margin-bottom: 20px;
+    }
+
+    .detail-overview {
+        color: #a1a1aa;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    .cast-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .cast-item {
+        text-align: center;
+        min-width: 0;
+    }
+
+    .cast-avatar {
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #292936, #111118);
+        border: 1px solid #30303a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f5c518;
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .cast-name {
+        color: #f4f4f5;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+    .cast-character {
+        color: #71717a;
+        font-size: 12px;
+        margin-top: 3px;
+    }
+
+    .keyword-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .keyword-item {
+        padding: 7px 13px;
+        border-radius: 999px;
+        background: #17171e;
+        border: 1px solid #292932;
+        color: #a1a1aa;
+        font-size: 12px;
+    }
+
+    .detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .info-card {
+        background: #111116;
+        border: 1px solid #292932;
+        border-radius: 14px;
+        padding: 22px 20px;
+    }
+
+    .info-title {
+        color: #f4f4f5;
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 13px;
+    }
+
+    .info-label {
+        color: #71717a;
+        flex-shrink: 0;
+    }
+
+    .info-value {
+        color: #f4f4f5;
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .recommendation-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px;
+        background: rgba(245, 197, 24, .13);
+        border: 1px solid rgba(245, 197, 24, .4);
+        border-radius: 12px;
+        color: #f5c518;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .2s;
+    }
+
+    .recommendation-button:hover {
+        background: rgba(245, 197, 24, .22);
+    }
+
+    @media (max-width: 900px) {
+        .detail-lower {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .cast-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        row-gap: 24px;
+        }
+    }
+    </style>
+
+    <div class="detail-lower">
+
+    <!-- Kolom Kiri -->
+    <div class="detail-left">
+
+        <!-- Sinopsis -->
+        <section>
+        <h2 class="detail-heading">Sinopsis</h2>
+        <p class="detail-overview">{{ movie.overview }}</p>
+        </section>
+
+        <!-- Pemeran Utama -->
+        <section>
+        <h2 class="detail-heading">Pemeran Utama</h2>
+
+        <div class="cast-grid">
+            {% for actor in movie.cast %}
+            <div class="cast-item">
+            <div class="cast-avatar">
+                {{ actor.name[:1] }}
+            </div>
+            <p class="cast-name">{{ actor.name }}</p>
+            <p class="cast-character">{{ actor.character }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        </section>
+
+        <!-- Tema dan Kata Kunci -->
+        <section>
+        <h2 class="detail-heading">Tema &amp; Kata Kunci</h2>
+
+        <div class="keyword-list">
+            {% for keyword in movie.keywords %}
+            <span class="keyword-item">#{{ keyword }}</span>
+            {% endfor %}
+        </div>
+        </section>
+
+    </div>
+
+    <!-- Kolom Kanan -->
+    <aside class="detail-sidebar">
+
+        <div class="info-card">
+        <h3 class="info-title">Informasi Film</h3>
+
+        <div class="info-list">
+
+            <div class="info-row">
+            <span class="info-label">Tahun Rilis</span>
+            <span class="info-value">{{ movie.release_year }}</span>
+            </div>
+
+            <div class="info-row">
+            <span class="info-label">Sutradara</span>
+            <span class="info-value">{{ movie.director }}</span>
+            </div>
+
+            <div class="info-row">
+            <span class="info-label">Durasi</span>
+            <span class="info-value">{{ movie.duration }}</span>
+            </div>
+
+            <div class="info-row">
+            <span class="info-label">Rating IMDb</span>
+            <span class="info-value">{{ movie.vote_average }}/10</span>
+            </div>
+
+            <div class="info-row">
+            <span class="info-label">Genre</span>
+            <span class="info-value">{{ movie.genres | join(', ') }}</span>
+            </div>
+
+        </div>
+        </div>
+
+        <a href="#film-serupa" class="recommendation-button">
+        ↓ Lihat Rekomendasi
+        </a>
+
+    </aside>
+
+    </div>
+
+
+
+    
+    <!-- Film Serupa -->
+    <style>
+    .similar-section {
+        margin-top: 36px;
+        padding-top: 24px;
+        border-top: 1px solid #292932;
+    }
+
+    .similar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .similar-label {
+        display: inline-block;
+        padding: 5px 12px;
+        border: 1px solid #292932;
+        border-radius: 999px;
+        background: #17171e;
+        color: #f5c518;
+        font-size: 11px;
+        margin-bottom: 10px;
+    }
+
+    .similar-title {
+        color: #f4f4f5;
+        font-size: 30px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .similar-description {
+        color: #71717a;
+        font-size: 14px;
+    }
+
+    .similar-manual {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border: 1px solid rgba(245,197,24,.4);
+        border-radius: 10px;
+        color: #f5c518;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .similar-manual:hover {
+        background: rgba(245,197,24,.1);
+    }
+
+    .similar-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .similar-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        min-width: 0;
+        padding: 12px;
+        background: #111116;
+        border: 1px solid #292932;
+        border-radius: 13px;
+        transition: border-color .2s;
+    }
+
+    .similar-card:hover {
+        border-color: rgba(245,197,24,.5);
+    }
+
+    .similar-poster {
+        width: 64px;
+        height: 112px;
+        flex-shrink: 0;
+        border-radius: 9px;
+        overflow: hidden;
+        background: #202027;
+    }
+
+    .similar-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .similar-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .similar-name {
+        color: #f4f4f5;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .similar-meta {
+        color: #71717a;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .similar-rating {
+        color: #f5c518;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 7px;
+    }
+
+    .similar-genres {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 7px;
+    }
+
+    .similar-detail-link {
+        display: inline-block;
+        color: #f5c518;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 7px;
+        text-decoration: none;
+    }
+
+    .similar-score {
+        flex-shrink: 0;
+        padding: 4px 9px;
+        border-radius: 999px;
+        background: #202027;
+        border: 1px solid #383842;
+        color: #a1a1aa;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 800px) {
+        .similar-grid {
+        grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .similar-header {
+        align-items: flex-start;
+        flex-direction: column;
+        }
+
+        .similar-title {
+        font-size: 25px;
+        }
+    }
+    </style>
+
+    <section id="film-serupa" class="similar-section">
+
+    <div class="similar-header">
+        <div>
+        <span class="similar-label">
+            ▣ FILM SERUPA 
+        </span>
+
+        <h2 class="similar-title">Film Serupa</h2>
+
+        <p class="similar-description">
+            Film dengan kemiripan konten tertinggi berdasarkan
+            <span class="text-foreground font-semibold">
+            "{{ movie.title }}"
+            </span>
+        </p>
+        </div>
+
+        <a href="{{ url_for('main.find_similar') }}"
+        class="similar-manual">
+        ✨ Cari Film Serupa
+        </a>
+    </div>
+
+    <div class="similar-grid">
+
+        {% for item in recommendations %}
+        <div class="similar-card">
+
+        <div class="similar-poster">
+            {% if item.poster_url %}
+            <img src="{{ item.poster_url }}"
+                alt="Poster {{ item.title }}">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-primary font-bold">
+            {{ item.title[:2] }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="similar-info">
+
+            <h3 class="similar-name">
+            {{ item.title }}
+            </h3>
+
+            <p class="similar-meta">
+            {{ item.release_year }} · {{ item.director }}
+            </p>
+
+            <p class="similar-rating">
+            ★ {{ item.vote_average }}
+            </p>
+
+            <div class="similar-genres">
+            {% for genre in item.genres[:2] %}
+                {{ genre_badge(genre) }}
+            {% endfor %}
+            </div>
+
+            <a href="{{ url_for('main.movie_detail', movie_id=item.id) }}"
+            class="similar-detail-link">
+            Lihat Detail →
+            </a>
+
+        </div>
+
+        <span class="similar-score">
+            ● {{ item.similarity }}% Mirip
+        </span>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+    </section>
+
+
+  </div>
+</section>
+{% endblock %}
