@@ -25,13 +25,13 @@ recommend_for_user(history_ids, n=10) # history_ids: TERBARU dulu; kosong -> pop
 popular(n=10)                        # similarity = None, source_movie_id = None
 ```
 
-* Artefak dimuat sekali pada pemanggilan pertama. Lokasi: `models/recommender.joblib` atau env `MOVIEMATCH_MODEL`.
+- Artefak dimuat sekali pada pemanggilan pertama. Lokasi: `models/recommender.joblib` atau env `MOVIEMATCH_MODEL`.
   Untuk app factory Flask, panggil `load_model()` sekali saat start.
-* Tiap item = dict tipe Python biasa (aman untuk Jinja dan `json.dumps`). Field = kontrak PRD §10
+- Tiap item = dict tipe Python biasa (aman untuk Jinja dan `json.dumps`). Field = kontrak PRD §10
   ditambah `overview` dan `keywords` (dipakai `jinja-components.md`). `shared_cast` selalu `[]` (CSV tidak punya cast, isu #2).
-* `release_year` bisa `None`. `similarity` 0–1; tampilkan `round(similarity × 100)`.
-* Film dengan similarity 0 tidak dikembalikan, jadi hasil bisa kurang dari `n` (tampilkan `empty_state` jika kosong).
-* Id di `recommend_for_user` yang tidak ada di data dilewati; hanya 10 film riwayat terbaru dipakai (`max_history`).
+- `release_year` bisa `None`. `similarity` 0–1; tampilkan `round(similarity × 100)`.
+- Film dengan similarity 0 tidak dikembalikan, jadi hasil bisa kurang dari `n` (tampilkan `empty_state` jika kosong).
+- Id di `recommend_for_user` yang tidak ada di data dilewati; hanya 10 film riwayat terbaru dipakai (`max_history`).
 
 ## Cara kerja
 
@@ -45,10 +45,10 @@ popular(n=10)                        # similarity = None, source_movie_id = None
 
 ## Keputusan yang masih terbuka (usulan Model, perlu disepakati)
 
-| Isu PRD | Usulan di kode | Catatan |
-|---|---|---|
-| #4 bobot rating | α = 0,2; `popular()` = weighted rating, m = kuantil 80% `vote_count` | Ubah di `DEFAULT_CONFIG`; hitung ulang di CSV asli |
-| Definisi relevan | Jaccard genre ≥ 0,5 | Sebagian sirkular (genre ada di `tags`); lengkapi dengan SUS/penilaian manual |
-| Riwayat | `max_history` = 10, gabungan `max` | `mean` memberi Precision lebih tinggi pada pengguna simulasi satu selera, tetapi simulasinya bias ke `mean` |
-| #14 ambang badge | lihat §7 notebook (persentil sebaran similarity) | Jalankan ulang di CSV asli |
-| #5 nilai N | `n` per pemanggilan; evaluasi K = 5, 10 | UI Cari Film Serupa memanggil `n=12` |
+| Isu PRD          | Usulan di kode                                                       | Catatan                                                                                                     |
+| ---------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| #4 bobot rating  | α = 0,2; `popular()` = weighted rating, m = kuantil 80% `vote_count` | Ubah di `DEFAULT_CONFIG`; hitung ulang di CSV asli                                                          |
+| Definisi relevan | Jaccard genre ≥ 0,5                                                  | Sebagian sirkular (genre ada di `tags`); lengkapi dengan SUS/penilaian manual                               |
+| Riwayat          | `max_history` = 10, gabungan `max`                                   | `mean` memberi Precision lebih tinggi pada pengguna simulasi satu selera, tetapi simulasinya bias ke `mean` |
+| #14 ambang badge | lihat §7 notebook (persentil sebaran similarity)                     | Jalankan ulang di CSV asli                                                                                  |
+| #5 nilai N       | `n` per pemanggilan; evaluasi K = 5, 10                              | UI Cari Film Serupa memanggil `n=12`                                                                        |
