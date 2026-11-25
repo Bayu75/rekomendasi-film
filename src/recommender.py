@@ -27,6 +27,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from .preprocessing import split_list
+
 DEFAULT_MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "recommender.joblib"
 
 
@@ -43,7 +45,8 @@ class Recommender:
         self._rating = self.movies["rating_score"].to_numpy(dtype=np.float64)
         self._genres = self.movies["genres"].tolist()
         self._keywords = self.movies["keywords"].tolist()
-        self._director = self.movies["director"].tolist()
+        # "director" di CSV bisa berisi beberapa nama dipisah "|"
+        self._directors = [list(dict.fromkeys(split_list(d))) for d in self.movies["director"]]
 
         # popular(): urut weighted rating menurun; seri -> vote_count terbanyak, lalu id
         order = np.lexsort((self._ids, -self.movies["vote_count"].to_numpy(), -self._rating))
@@ -108,12 +111,13 @@ class Recommender:
                 shared_keywords.append(k)
                 seen.add(k)
 
-        director = self._director[cand_idx]
-        same_director = bool(director) and director == self._director[src_idx]
+        src_dir = set(self._directors[src_idx])
+        shared_dir = [d for d in self._directors[cand_idx] if d in src_dir]
+        same_director = bool(shared_dir)
 
         reasons: list[str] = []
         if same_director:
-            reasons.append(f"Sutradara sama: {director}")
+            reasons.append("Sutradara sama: " + ", ".join(shared_dir))
         if shared_genres:
             reasons.append("Genre: " + ", ".join(shared_genres[:3]))
         if shared_keywords:
@@ -134,7 +138,7 @@ class Recommender:
             "title": str(row["title"]),
             "release_year": None if pd.isna(year) else int(year),
             "genres": list(self._genres[idx]),
-            "director": str(row["director"]),
+            "director": ", ".join(self._directors[idx]),
             "vote_average": float(row["vote_average"]),
             "vote_count": int(row["vote_count"]),
             "overview": str(row["overview"]),
