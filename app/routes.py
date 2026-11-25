@@ -295,6 +295,7 @@ def movie_detail(movie_id):
 def find_similar():
     selected_raw = request.args.get("selected")
     show_results = request.args.get("hasil") == "1"
+    query = (request.args.get("q") or "").strip()
 
     selected_movie = None
     if selected_raw not in (None, ""):
@@ -311,12 +312,25 @@ def find_similar():
     if selected_movie and show_results:
         similar_movies = _rekomendasi(selected_movie["id"], N_SERUPA)
 
+    # Hasil pencarian judul acuan (untuk template setelah form ?q= siap)
+    search_results: list[dict] = []
+    if query and selected_movie is None:
+        rows = (
+            Movie.query.filter(Movie.title.ilike(f"%{query}%"))
+            .order_by(Movie.vote_count.desc(), Movie.title.asc())
+            .limit(N_SERUPA)
+            .all()
+        )
+        search_results = [_film_ke_dict(m) for m in rows]
+
     return render_template(
         "pages/find_similar.html",
         selected_movie=selected_movie,
         show_results=show_results and selected_movie is not None,
         similar_movies=similar_movies,
         popular_movies=_populer(N_POPULER),
+        query=query,
+        search_results=search_results,
     )
 
 
