@@ -3,7 +3,7 @@
 
 
 {% macro movie_card(movie, similarity=None, href=None, action_label=None, action_url=None, index=None, delay_step=40) -%}
-{%- set link = href or url_for('main.movie_detail', movie_id=movie.id) -%}
+{%- set link = href or url_for('main.movie_detail', movie_id=movie.id, **{'from': request.path}) -%}
 {%- set title = movie.title or 'Tanpa Judul' -%}
 {%- set initials = (title.split()[:2] | map('first') | join | upper) -%}
 {%- set director = (movie.director or '').split(',')[0] | trim -%}
@@ -73,4 +73,70 @@
 {%- endmacro %}
 
 
-{#- recommendation_card(movie, source_movie_id): PEMILIK FRONTEND B, belum dibuat. -#}
+{% macro recommendation_card(movie, source_movie_id) -%}
+{% set title = movie.title or 'Tanpa Judul' %}
+{% set link = url_for(
+    'main.movie_detail',
+    movie_id=movie.id,
+    dari=source_movie_id
+) %}
+
+<a href="{{ link }}"
+   class="group block bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:-translate-y-1 transition-all duration-300">
+
+  <div class="relative aspect-[2/3] bg-muted overflow-hidden">
+
+    {% if movie.poster_url %}
+    <img src="{{ movie.poster_url }}"
+         alt="Poster {{ title }}"
+         loading="lazy"
+         data-poster
+         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+    {% endif %}
+
+    <div data-poster-fallback
+         class="{% if movie.poster_url %}hidden {% endif %}w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-secondary">
+      <span class="text-primary font-bold text-xl">
+        {{ title[:2] | upper }}
+      </span>
+    </div>
+
+    <div class="absolute top-2 left-2">
+      {{ similarity_badge(movie.similarity, size='sm') }}
+    </div>
+
+    <div class="absolute top-2 right-2 bg-black/70 rounded-md px-1.5 py-0.5">
+      {{ rating_badge(movie.vote_average) }}
+    </div>
+
+  </div>
+
+  <div class="p-3 space-y-2">
+
+    <h3 class="text-sm font-bold font-display text-foreground line-clamp-2">
+      {{ title }}
+    </h3>
+
+    {% if movie.release_year %}
+    <p class="text-xs text-muted-foreground">
+      {{ movie.release_year }}
+    </p>
+    {% endif %}
+
+    {% if movie.shared_genres %}
+    <div class="flex flex-wrap gap-1">
+      {% for genre in movie.shared_genres[:2] %}
+        {{ genre_badge(genre) }}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if movie.same_director %}
+    <p class="text-xs text-primary">
+      Sutradara sama
+    </p>
+    {% endif %}
+
+  </div>
+</a>
+{%- endmacro %}

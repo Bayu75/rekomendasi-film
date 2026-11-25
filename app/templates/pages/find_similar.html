@@ -1,0 +1,767 @@
+
+{% extends "base.html" %}
+
+{% from 'partials/cards.html' import movie_card %}
+
+{% block title %}Cari Film Serupa - MovieMatch{% endblock %}
+
+{% block content %}
+
+<style>
+  /* =====================================
+     HALAMAN CARI FILM SERUPA
+     ===================================== */
+
+  .similar-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 100px 24px 64px;
+    background: #09090c;
+  }
+
+  .similar-container {
+    width: 100%;
+    max-width: 1232px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .similar-header {
+    margin-bottom: 38px;
+  }
+
+  .similar-title {
+    color: #f5f5f5;
+    font-size: clamp(36px, 4vw, 48px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  .similar-description {
+    color: #85859a;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 580px;
+  }
+
+  /* PROGRESS STEPS */
+  .similar-progress {
+    width: 100%;
+    max-width: 735px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 42px;
+  }
+
+  .similar-step {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+  }
+
+  .similar-step-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    background: #111116;
+    border: 1px solid #292934;
+    color: #777789;
+  }
+
+  .similar-step.active .similar-step-number,
+  .similar-step.completed .similar-step-number {
+    background: #f5c518;
+    border-color: #f5c518;
+    color: #111116;
+  }
+
+  .similar-step-label {
+    font-size: 13px;
+    color: #777789;
+    white-space: nowrap;
+  }
+
+  .similar-step.active .similar-step-label,
+  .similar-step.completed .similar-step-label {
+    color: #f5c518;
+    font-weight: 700;
+  }
+
+  .similar-step-line {
+    height: 2px;
+    flex: 1;
+    min-width: 35px;
+    background: #30303a;
+    margin: 0 14px;
+  }
+
+  /* LANGKAH 1: PENCARIAN */
+  .similar-search-section {
+    width: 100%;
+    max-width: 735px;
+  }
+
+  .similar-section-title {
+    color: #f5f5f5;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+
+  .similar-search-box {
+    width: 100%;
+    min-height: 74px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: #111116;
+    border: 1px solid #a98200;
+    border-radius: 12px;
+  }
+
+  .similar-search-box input {
+    flex: 1;
+    min-width: 0;
+    color: #f5f5f5;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .similar-search-box input::placeholder {
+    color: #777789;
+  }
+
+  .similar-search-button {
+    padding: 12px 25px;
+    background: #f5c518;
+    color: #111116;
+    border: none;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* FILM POPULER */
+  .popular-movies {
+    width: 100%;
+    max-width: none;
+    margin: 34px auto 0;
+  }
+
+  .popular-heading {
+    text-align: center;
+    color: #85859a;
+    font-size: 14px;
+    margin-bottom: 22px;
+  }
+
+  .popular-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+
+  .movie-option {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .movie-option > div {
+    width: 100%;
+  }
+
+  .select-movie-button {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px 12px;
+    border: 1px solid #a98200;
+    border-radius: 9px;
+    background: rgba(245, 197, 24, 0.10);
+    color: #f5c518;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .select-movie-button:hover {
+    background: #f5c518;
+    color: #111116;
+  }
+
+  /* LANGKAH 2: KONFIRMASI */
+  .confirmation-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .confirmation-title {
+    color: #f5f5f5;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .choose-another {
+    color: #85859a;
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .choose-another:hover {
+    color: #f5c518;
+  }
+
+  .confirmation-card {
+    width: 100%;
+    max-width: 512px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #111116;
+    border: 1px solid #8b6900;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(245, 197, 24, 0.05);
+  }
+
+  .confirmation-badge-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .confirmation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border: 1px solid #745600;
+    border-radius: 30px;
+    background: rgba(245, 197, 24, 0.10);
+    color: #f5c518;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .confirmation-movie {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .confirmation-poster {
+    width: 112px;
+    height: 168px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #24242b;
+  }
+
+  .confirmation-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .confirmation-poster-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5c518;
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .confirmation-movie-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .confirmation-movie-title {
+    color: #f5f5f5;
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .confirmation-movie-meta {
+    color: #777789;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .confirmation-genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .confirmation-genre {
+    padding: 4px 11px;
+    border-radius: 20px;
+    border: 1px solid #294b80;
+    background: rgba(20, 80, 150, 0.16);
+    color: #60baff;
+    font-size: 12px;
+  }
+
+  .confirmation-rating {
+    color: #f5c518;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .confirmation-description {
+    color: #777789;
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .confirmation-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .confirmation-change {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #292934;
+    border-radius: 11px;
+    color: #9999a9;
+    text-decoration: none;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .confirmation-change:hover {
+    background: #202027;
+  }
+
+  .confirmation-submit {
+    flex: 2;
+    padding: 12px;
+    border: none;
+    border-radius: 11px;
+    background: #f5c518;
+    color: #111116;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .confirmation-submit:hover {
+    background: #e6b600;
+  }
+
+
+/* LANGKAH 3: HASIL REKOMENDASI */
+.results-heading {
+  margin-bottom: 28px;
+}
+
+.results-title {
+  color: #f5f5f5;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.results-description {
+  color: #85859a;
+  font-size: 14px;
+}
+
+.results-count {
+  color: #85859a;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.results-layout {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.result-movie {
+  min-width: 0;
+  position: relative;
+}
+
+.similarity-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: rgba(17, 17, 22, 0.9);
+  border: 1px solid #44404a;
+  color: #f5c518;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.result-detail-link {
+  display: block;
+  margin-top: 10px;
+  padding: 9px;
+  border-radius: 9px;
+  background: #f5c518;
+  color: #111116;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.result-detail-link:hover {
+  background: #e6b600;
+}
+
+@media (max-width: 900px) {
+  .results-layout {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .results-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .results-title {
+    font-size: 24px;
+  }
+}
+
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .popular-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .similar-progress {
+      max-width: 100%;
+    }
+
+    .similar-step-line {
+      min-width: 12px;
+      margin: 0 6px;
+    }
+
+    .similar-step {
+      gap: 5px;
+    }
+
+    .similar-step-label {
+      font-size: 10px;
+    }
+
+    .similar-step-number {
+      width: 30px;
+      height: 30px;
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .similar-page {
+      padding: 85px 16px 48px;
+    }
+
+    .popular-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .confirmation-card {
+      padding: 18px;
+    }
+
+    .confirmation-movie {
+      gap: 12px;
+    }
+
+    .confirmation-poster {
+      width: 90px;
+      height: 135px;
+    }
+
+    .confirmation-movie-title {
+      font-size: 17px;
+    }
+
+    .confirmation-movie-meta {
+      font-size: 12px;
+    }
+
+    .confirmation-actions {
+      gap: 8px;
+    }
+  }
+</style>
+
+<section class="similar-page">
+  <div class="similar-container">
+
+    {% if not selected_movie %}
+
+    <!-- HEADER LANGKAH 1 -->
+    <div class="similar-header">
+
+      <h1 class="similar-title">Cari Film Serupa</h1>
+
+      <p class="similar-description">
+        Pilih sebuah film dan temukan film lain yang memiliki karakteristik konten serupa.
+      </p>
+    </div>
+
+    {% endif %}
+
+    
+    <!-- PROGRESS STEPS -->
+    <div class="similar-progress">
+
+    <div class="similar-step {% if selected_movie %}completed{% else %}active{% endif %}">
+        <div class="similar-step-number">
+        {% if selected_movie %}✓{% else %}1{% endif %}
+        </div>
+        <span class="similar-step-label">Pilih Film Acuan</span>
+    </div>
+
+    <div class="similar-step-line"
+        style="{% if show_results %}background: #f5c518;{% endif %}">
+    </div>
+
+    <div class="similar-step {% if selected_movie and not show_results %}active{% elif show_results %}completed{% endif %}">
+        <div class="similar-step-number">
+        {% if show_results %}✓{% else %}2{% endif %}
+        </div>
+        <span class="similar-step-label">Konfirmasi</span>
+    </div>
+
+    <div class="similar-step-line"
+        style="{% if show_results %}background: #f5c518;{% endif %}">
+    </div>
+
+    <div class="similar-step {% if show_results %}active{% endif %}">
+        <div class="similar-step-number">3</div>
+        <span class="similar-step-label">Hasil</span>
+    </div>
+
+    </div>
+
+
+    {% if selected_movie and show_results %}
+
+    <!-- LANGKAH 3: HASIL REKOMENDASI -->
+    <div class="results-heading">
+
+    <h2 class="results-title">
+        Film Serupa dengan
+        <span style="color: #f5c518;">"{{ selected_movie.title }}"</span>
+    </h2>
+
+    <p class="results-description">
+        Berikut film dengan karakteristik konten yang serupa.
+    </p>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+    <p class="results-count">
+        {{ similar_movies|length }} film serupa ditemukan · Diurutkan berdasarkan kemiripan tertinggi
+    </p>
+
+    <a href="{{ url_for('main.find_similar') }}"
+        class="choose-another">
+        ← Ganti Film Acuan
+    </a>
+    </div>
+
+    <div class="results-layout">
+
+    {% for movie in similar_movies %}
+    <div class="result-movie">
+
+        <span class="similarity-badge">
+        ● {{ movie.similarity }}% Mirip
+        </span>
+
+        {{ movie_card(movie, index=loop.index0) }}
+
+    </div>
+    {% endfor %}
+
+    </div>
+
+    {% elif selected_movie %}
+
+
+    <!-- LANGKAH 2: KONFIRMASI -->
+    <div class="confirmation-heading">
+      <h2 class="confirmation-title">
+        Langkah 2: Konfirmasi Film Acuan
+      </h2>
+
+      <a href="{{ url_for('main.find_similar') }}"
+         class="choose-another">
+        ‹ Pilih film lain
+      </a>
+    </div>
+
+    <div class="confirmation-card">
+
+      <div class="confirmation-badge-wrapper">
+        <span class="confirmation-badge">
+          ✓ Film Acuan Dipilih
+        </span>
+      </div>
+
+      <div class="confirmation-movie">
+
+        <div class="confirmation-poster">
+          {% if selected_movie.poster_url %}
+          <img
+            src="{{ selected_movie.poster_url }}"
+            alt="Poster {{ selected_movie.title }}"
+          >
+          {% else %}
+          <div class="confirmation-poster-fallback">
+            {{ selected_movie.title[:2]|upper }}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="confirmation-movie-info">
+
+          <h3 class="confirmation-movie-title">
+            {{ selected_movie.title }}
+          </h3>
+
+          <p class="confirmation-movie-meta">
+            {{ selected_movie.release_year }} · {{ selected_movie.director }}
+          </p>
+
+          <div class="confirmation-genres">
+            {% for genre in selected_movie.genres %}
+            <span class="confirmation-genre">
+              {{ genre }}
+            </span>
+            {% endfor %}
+          </div>
+
+          <p class="confirmation-rating">
+            ★ {{ selected_movie.vote_average }}
+          </p>
+
+        </div>
+      </div>
+
+      <p class="confirmation-description">
+        Sistem akan mencari film lain yang memiliki genre, tema, pemeran, dan sutradara serupa.
+      </p>
+
+      <div class="confirmation-actions">
+
+        <a href="{{ url_for('main.find_similar') }}"
+           class="confirmation-change">
+          Ganti Film
+        </a>
+
+        <a href="{{ url_for('main.find_similar', selected=selected_movie.id, hasil=1) }}"
+        class="confirmation-submit"
+        style="display: block; text-align: center; text-decoration: none;">
+        ✨ Cari Film Serupa
+        </a>
+
+      </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- LANGKAH 1: PENCARIAN FILM -->
+    <div class="similar-search-section">
+
+      <h2 class="similar-section-title">
+        Langkah 1: Cari Film Acuan
+      </h2>
+
+      <div class="similar-search-box">
+
+        <span style="color: #85859a; font-size: 20px;">⌕</span>
+
+        <input
+          type="text"
+          id="movie-search"
+          placeholder="Cari film yang ingin kamu jadikan acuan..."
+        >
+
+        <button type="button" class="similar-search-button">
+          Cari
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- FILM POPULER -->
+    <div class="popular-movies">
+
+      <p class="popular-heading">
+        Atau pilih dari film populer:
+      </p>
+
+      <div class="popular-grid">
+
+        {% for movie in popular_movies %}
+        <div class="movie-option">
+
+          <!-- Card yang sama dengan Explore -->
+          {{ movie_card(movie, index=loop.index0) }}
+
+          <!-- Tombol Pilih -->
+          <a
+            href="{{ url_for('main.find_similar', selected=movie.id) }}"
+            class="select-movie-button"
+          >
+            Pilih
+          </a>
+
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+
+{# Empty State Component - Frontend B #}
+
+{% macro empty_state(type, query=None, action_url=None, action_label=None) %}
+
+<div class="flex flex-col items-center justify-center text-center bg-muted border border-border rounded-2xl p-8 sm:p-12">
+
+  {# Icon #}
+  <div class="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
+    {% if type == 'search' %}
+      <span class="text-3xl">🔍</span>
+    {% elif type == 'noResults' %}
+      <span class="text-3xl">🎬</span>
+    {% elif type == 'noRecommendations' %}
+      <span class="text-3xl">🍿</span>
+    {% elif type == 'selectMovie' %}
+      <span class="text-3xl">🎞️</span>
+    {% else %}
+      <span class="text-3xl">🎥</span>
+    {% endif %}
+  </div>
+
+  {# Title and Description #}
+  {% if type == 'search' %}
+    <h3 class="text-lg font-bold font-display text-foreground mb-2">
+      Cari Film Favoritmu
+    </h3>
+    <p class="text-sm text-muted-foreground max-w-md">
+      Masukkan judul film yang ingin kamu cari.
+    </p>
+
+  {% elif type == 'noResults' %}
+    <h3 class="text-lg font-bold font-display text-foreground mb-2">
+      Film Tidak Ditemukan
+    </h3>
+    <p class="text-sm text-muted-foreground max-w-md">
+      {% if query %}
+        Tidak ada film yang cocok dengan pencarian "{{ query }}".
+      {% else %}
+        Belum ada film yang tersedia.
+      {% endif %}
+      Coba gunakan kata kunci lain.
+    </p>
+
+  {% elif type == 'noRecommendations' %}
+    <h3 class="text-lg font-bold font-display text-foreground mb-2">
+      Belum Ada Rekomendasi
+    </h3>
+    <p class="text-sm text-muted-foreground max-w-md">
+      Belum ada film serupa yang dapat ditampilkan.
+      Coba pilih film lainnya.
+    </p>
+
+  {% elif type == 'selectMovie' %}
+    <h3 class="text-lg font-bold font-display text-foreground mb-2">
+      Pilih Film Acuan
+    </h3>
+    <p class="text-sm text-muted-foreground max-w-md">
+      Cari dan pilih film yang ingin kamu gunakan sebagai acuan untuk menemukan film serupa.
+    </p>
+  {% endif %}
+
+  {# Action Button #}
+  {% if action_url and action_label %}
+    <a href="{{ action_url }}"
+       class="inline-flex items-center justify-center mt-6 px-5 py-2.5 bg-primary text-primary-foreground font-bold font-display text-sm rounded-lg hover:bg-primary/90 transition-colors">
+      {{ action_label }}
+    </a>
+  {% endif %}
+
+</div>
+
+{% endmacro %}

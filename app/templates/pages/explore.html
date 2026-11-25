@@ -1,0 +1,88 @@
+
+{% extends "base.html" %}
+
+{% from 'partials/cards.html' import movie_card %}
+{% from 'partials/search_bar.html' import search_bar %}
+{% from 'partials/empty_state.html' import empty_state %}
+
+{% block title %}Cari Film - MovieMatch{% endblock %}
+
+{% block content %}
+<section class="min-h-screen bg-background">
+  <div class="max-w-7xl mx-auto px-6 pb-12"
+     style="padding-top: 100px;">
+
+    <!-- Header -->
+    <div class="mb-6">
+      <p class="text-primary text-xs font-bold font-display tracking-wider mb-1">
+        JELAJAHI
+      </p>
+      <h1 class="text-4xl sm:text-5xl font-black font-display text-foreground">
+        Cari Film
+      </h1>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-8">
+      {{ search_bar(
+        url_for('main.explore'),
+        value=query|default(''),
+        placeholder='Masukkan judul film, sutradara, atau genre...',
+        size='lg'
+      ) }}
+    </div>
+
+    <!-- Genre Filter -->
+    <div class="flex flex-wrap gap-2 mb-10">
+      <a href="{{ url_for('main.explore') }}"
+         class="px-3 py-2 rounded-full text-xs font-semibold border
+         {% if not active_genre|default('') %}
+         bg-primary text-primary-foreground border-primary
+         {% else %}
+         bg-card text-muted-foreground border-border hover:border-primary
+         {% endif %}">
+        Semua
+      </a>
+
+      {% for genre in all_genres|default([]) %}
+      <a href="{{ url_for('main.explore', genre=genre) }}"
+         class="px-3 py-2 rounded-full text-xs font-semibold border
+         {% if active_genre|default('') == genre %}
+         bg-primary text-primary-foreground border-primary
+         {% else %}
+         bg-card text-muted-foreground border-border hover:border-primary
+         {% endif %}">
+        {{ genre }}
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- Movie Heading -->
+    <div class="mb-6">
+      <h2 class="text-base font-bold font-display text-foreground">
+        Semua Film
+        <span class="text-muted-foreground font-normal">
+          ({{ result_count|default(0) }})
+        </span>
+      </h2>
+    </div>
+
+    <!-- Movie Grid -->
+    {% if movies|default([]) %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {% for movie in movies %}
+        {{ movie_card(movie, index=loop.index0) }}
+      {% endfor %}
+    </div>
+    {% else %}
+      {{ empty_state(
+        'noResults',
+        query=query|default(''),
+        action_url=url_for('main.explore'),
+        action_label='Tampilkan Semua Film'
+      ) }}
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
