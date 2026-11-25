@@ -9,6 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap">
+  
+  <script>
+    // Menerapkan tema tersimpan sebelum halaman tampil agar tidak berkedip
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  </script>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
   {% block head %}{% endblock %}
@@ -25,6 +32,7 @@
   <script src="{{ url_for('static', filename='js/poster.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/navbar.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/search_bar.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
