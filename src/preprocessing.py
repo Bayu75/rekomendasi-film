@@ -85,9 +85,10 @@ def build_tags(
     parts: list[str] = [clean_text(overview)]
     parts += [squash(g) for g in genres] * genre_weight
     parts += [clean_text(k) for k in keywords] * keyword_weight
-    d = squash(director)
-    if d:
-        parts += [d] * director_weight
+    # sutradara bisa lebih dari satu ("A|B"): tiap orang jadi satu token sendiri
+    for d in dict.fromkeys(squash(x) for x in split_list(director)):
+        if d:
+            parts += [d] * director_weight
     return _SPACES.sub(" ", " ".join(p for p in parts if p)).strip()
 
 

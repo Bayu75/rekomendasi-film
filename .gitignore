@@ -10,3 +10,7 @@ models/*
 .ipynb_checkpoints/
 .DS_Store
 node_modules/
+data/*.csv
+models/*.joblib
+.env
+.pytest_cache/
