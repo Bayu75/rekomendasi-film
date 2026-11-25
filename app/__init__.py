@@ -19,7 +19,12 @@ def create_app():
 
     register_template_globals(app)
 
-    from .routes import main, auth
+    from .auth import auth, inject_current_user, load_current_user
+    from .routes import main
+
+    app.before_request(load_current_user)
+    app.context_processor(inject_current_user)
+
     app.register_blueprint(main)
     app.register_blueprint(auth)
 
