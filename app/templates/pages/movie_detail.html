@@ -11,9 +11,9 @@
      style="padding-top: 100px;">
 
     <!-- Tombol Kembali -->
-    <a href="{{ url_for('main.explore') }}"
-       class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8">
-      <span>‹</span> Kembali
+    <a href="{{ request.args.get('from') if request.args.get('from') in ['/explore', '/cari-serupa'] else url_for('main.explore') }}"
+    class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8">
+    <span>‹</span> Kembali
     </a>
 
     <!-- Informasi Utama Film -->
