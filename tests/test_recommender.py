@@ -210,3 +210,15 @@ def test_evaluate_similar_and_users(model):
     res = evaluate_similar(model, q, ks=(3,), n=3)
     assert res["P@3"] > 0.9  # tema sangat terpisah di data mini
     assert len(simulate_users(model, 3, history_size=2, min_rating=0, seed=1, min_holdout=2)) >= 1
+
+
+def test_multiple_directors():
+    df = _rows()
+    df.loc[df["id"] == 10, "director"] = "Ann Lee|Zed Ko"
+    df.loc[df["id"] == 20, "director"] = "Zed Ko"
+    m = Recommender(build_bundle(df, min_df=1))
+    t = build_tags("x", [], [], "Ann Lee|Zed Ko")
+    assert "annlee" in t.split() and "zedko" in t.split()
+    top = {r["id"]: r for r in m.recommend(10, 4)}
+    assert top[20]["same_director"] is True and "Sutradara sama: Zed Ko" in top[20]["reasons"]
+    assert m.popular(len(m))[0]["director"] != "" and "|" not in "".join(r["director"] for r in m.popular(len(m)))
