@@ -1,8 +1,10 @@
 import os
-from flask import Flask
+
 from dotenv import load_dotenv
+from flask import Flask
 
 from .genre_styles import register_template_globals
+from .models import db
 
 load_dotenv()
 
@@ -10,12 +12,23 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "ganti-di-env")
-    # Koneksi MySQL (dipakai nanti oleh backend dengan Flask-SQLAlchemy)
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    db.init_app(app)
 
     register_template_globals(app)
 
-    from .routes import main, auth
+    from .auth import auth, inject_current_user, load_current_user
+    from .routes import main
+
+    app.before_request(load_current_user)
+    app.context_processor(inject_current_user)
+
     app.register_blueprint(main)
     app.register_blueprint(auth)
+
+    with app.app_context():
+        db.create_all()
+
     return app
