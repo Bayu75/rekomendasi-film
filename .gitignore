@@ -14,3 +14,5 @@ data/*.csv
 models/*.joblib
 .env
 .pytest_cache/
+data/raw/
+data/processed/
