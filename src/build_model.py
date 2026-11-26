@@ -110,7 +110,7 @@ def save_bundle(bundle: dict, path: str | Path) -> Path:
 
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="Bangun artefak model MovieMatch dari CSV.")
-    p.add_argument("--csv", default="data/movies_clean_final.csv")
+    p.add_argument("--csv", default="data/processed/movies_clean_final.csv")
     p.add_argument("--out", default="models/recommender.joblib")
     p.add_argument("--alpha", type=float, default=None, help="bobot rating pada ranking (0..1)")
     args = p.parse_args(argv)
