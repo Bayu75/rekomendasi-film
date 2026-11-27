@@ -102,7 +102,48 @@
 
     </div>
 
+    {% if why %}
+    <!-- Banner Rekomendasi -->
+    <div style="
+        margin-top: 36px;
+        padding: 22px 26px;
+        background: linear-gradient(135deg, rgba(245,197,24,.12), rgba(245,197,24,.04));
+        border: 1px solid rgba(245,197,24,.35);
+        border-radius: 16px;
+    ">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <span style="font-size: 22px;">✨</span>
+            <h2 style="color: #f5c518; font-size: 17px; font-weight: 800; margin: 0;">
+                Direkomendasikan berdasarkan
+            </h2>
+        </div>
 
+        {% if why.source_title %}
+        <p style="color: #f4f4f5; font-size: 15px; margin-bottom: 12px;">
+            Film <strong>{{ why.source_title }}</strong>
+        </p>
+        {% endif %}
+
+        {% if why.reasons %}
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+            {% for reason in why.reasons %}
+            <div style="display: flex; align-items: flex-start; gap: 9px;">
+                <span style="color: #f5c518; font-size: 15px;">✦</span>
+                <span style="font-size: 13px; line-height: 1.6;">
+                    {% if ':' in reason %}
+                        <strong style="color: #f5c518;">{{ reason.split(':', 1)[0] }}:</strong>
+                        <span style="color: #a1a1aa;">{{ reason.split(':', 1)[1] }}</span>
+                    {% else %}
+                        <span style="color: #a1a1aa;">{{ reason }}</span>
+                    {% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+    {% endif %}
 
     <!-- Sinopsis, Pemeran, dan Informasi Film -->
     <style>
@@ -590,7 +631,7 @@
             {% endfor %}
             </div>
 
-            <a href="{{ url_for('main.movie_detail', movie_id=item.id) }}"
+            <a href="{{ url_for('main.movie_detail', movie_id=item.id, dari=movie.id) }}"
             class="similar-detail-link">
             Lihat Detail →
             </a>

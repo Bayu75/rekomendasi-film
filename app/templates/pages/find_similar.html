@@ -612,7 +612,16 @@
             ● {{ (movie.similarity * 100)|round|int }}% Mirip
         </span>
 
-        {{ movie_card(movie, index=loop.index0) }}
+        {{ movie_card(
+          movie,
+          index=loop.index0,
+          href=url_for(
+              'main.movie_detail',
+              movie_id=movie.id,
+              dari=selected_movie.id,
+              **{'from': request.full_path.rstrip('?')}
+          )
+      ) }}
 
     </div>
     {% endfor %}
