@@ -26,6 +26,7 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
 
+
 class Movie(db.Model):
     __tablename__ = "movies"
 
@@ -42,6 +43,10 @@ class Movie(db.Model):
     runtime = db.Column(db.Integer, nullable=True)
     cast_list = db.Column(db.Text, nullable=True)
 
+    # Data tambahan untuk halaman detail film
+    runtime = db.Column(db.Float, nullable=True)
+    cast_list = db.Column(db.Text, nullable=True)
+
     @property
     def genre_list(self):
         return [g for g in (self.genres or "").split("|") if g]
@@ -50,6 +55,26 @@ class Movie(db.Model):
     def keyword_list(self):
         return [k for k in (self.keywords or "").split("|") if k]
 
+    @property
+    def cast(self):
+        """Ubah cast_list menjadi daftar aktor dan karakter."""
+        hasil = []
+
+        for item in (self.cast_list or "").split("|"):
+            if not item.strip():
+                continue
+
+            bagian = item.split("::", 1)
+            nama = bagian[0].strip()
+            karakter = bagian[1].strip() if len(bagian) > 1 else ""
+
+            if nama:
+                hasil.append({
+                    "name": nama,
+                    "character": karakter
+                })
+
+        return hasil
 
 class SearchHistory(db.Model):
     __tablename__ = "search_history"
