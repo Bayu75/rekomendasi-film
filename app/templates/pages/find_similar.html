@@ -16,7 +16,7 @@
     width: 100%;
     min-height: 100vh;
     padding: 100px 24px 64px;
-    background: #09090c;
+    background: var(--color-background);
   }
 
   .similar-container {
@@ -31,7 +31,7 @@
   }
 
   .similar-title {
-    color: #f5f5f5;
+    color: var(--color-foreground);
     font-size: clamp(36px, 4vw, 48px);
     font-weight: 900;
     line-height: 1.15;
@@ -39,7 +39,7 @@
   }
 
   .similar-description {
-    color: #85859a;
+    color: var(--color-muted-foreground);
     font-size: 14px;
     line-height: 1.6;
     max-width: 580px;
@@ -70,9 +70,9 @@
     justify-content: center;
     font-size: 14px;
     font-weight: 700;
-    background: #111116;
-    border: 1px solid #292934;
-    color: #777789;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-muted-foreground);
   }
 
   .similar-step.active .similar-step-number,
@@ -84,7 +84,7 @@
 
   .similar-step-label {
     font-size: 13px;
-    color: #777789;
+    color: var(--color-muted-foreground);
     white-space: nowrap;
   }
 
@@ -109,7 +109,7 @@
   }
 
   .similar-section-title {
-    color: #f5f5f5;
+    color: var(--color-foreground);
     font-size: 17px;
     font-weight: 700;
     margin-bottom: 18px;
@@ -122,7 +122,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
-    background: #111116;
+    background: var(--color-card);
     border: 1px solid #a98200;
     border-radius: 12px;
   }
@@ -130,7 +130,7 @@
   .similar-search-box input {
     flex: 1;
     min-width: 0;
-    color: #f5f5f5;
+    color: var(--color-card-foreground);
     background: transparent;
     border: none;
     outline: none;
@@ -138,7 +138,7 @@
   }
 
   .similar-search-box input::placeholder {
-    color: #777789;
+    color: var(--color-muted-foreground);
   }
 
   .similar-search-button {
@@ -213,13 +213,13 @@
   }
 
   .confirmation-title {
-    color: #f5f5f5;
+    color: var(--color-foreground);
     font-size: 18px;
     font-weight: 700;
   }
 
   .choose-another {
-    color: #85859a;
+    color: var(--color-muted-foreground);
     font-size: 13px;
     text-decoration: none;
     white-space: nowrap;
@@ -234,7 +234,7 @@
     max-width: 512px;
     margin: 0 auto;
     padding: 24px;
-    background: #111116;
+    background: var(--color-card);
     border: 1px solid #8b6900;
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(245, 197, 24, 0.05);
@@ -271,7 +271,7 @@
     flex-shrink: 0;
     overflow: hidden;
     border-radius: 12px;
-    background: #24242b;
+    background: var(--color-muted);
   }
 
   .confirmation-poster img {
@@ -286,7 +286,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f5c518;
+    color: var(--color-primary);
     font-size: 22px;
     font-weight: 800;
   }
@@ -297,14 +297,14 @@
   }
 
   .confirmation-movie-title {
-    color: #f5f5f5;
+    color: var(--color-card-foreground);
     font-size: 21px;
     font-weight: 800;
     margin-bottom: 4px;
   }
 
   .confirmation-movie-meta {
-    color: #777789;
+    color: var(--color-muted-foreground);
     font-size: 14px;
     margin-bottom: 12px;
   }
@@ -332,7 +332,7 @@
   }
 
   .confirmation-description {
-    color: #777789;
+    color: var(--color-muted-foreground);
     font-size: 12px;
     line-height: 1.6;
     text-align: center;
@@ -347,9 +347,9 @@
   .confirmation-change {
     flex: 1;
     padding: 12px;
-    border: 1px solid #292934;
+    border: 1px solid var(--color-border);
     border-radius: 11px;
-    color: #9999a9;
+    color: var(--color-muted-foreground);
     text-decoration: none;
     text-align: center;
     font-size: 13px;
@@ -357,7 +357,7 @@
   }
 
   .confirmation-change:hover {
-    background: #202027;
+    background: var(--color-muted);
   }
 
   .confirmation-submit {
@@ -383,7 +383,7 @@
 }
 
 .results-title {
-  color: #f5f5f5;
+  color: var(--color-foreground);
   font-size: 30px;
   font-weight: 800;
   line-height: 1.2;
@@ -391,12 +391,12 @@
 }
 
 .results-description {
-  color: #85859a;
+  color: var(--color-muted-foreground);
   font-size: 14px;
 }
 
 .results-count {
-  color: #85859a;
+  color: var(--color-muted-foreground);
   font-size: 13px;
   margin-bottom: 20px;
 }
@@ -419,9 +419,9 @@
   z-index: 5;
   padding: 5px 9px;
   border-radius: 20px;
-  background: rgba(17, 17, 22, 0.9);
-  border: 1px solid #44404a;
-  color: #f5c518;
+  background: var(--color-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-muted-foreground);  
   font-size: 11px;
   font-weight: 700;
 }

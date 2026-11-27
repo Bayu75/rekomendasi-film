@@ -5,6 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, render_template
 from flask_wtf.csrf import CSRFProtect
+from flask_migrate import Migrate
 
 from .genre_styles import register_template_globals
 from .models import db
@@ -12,6 +13,7 @@ from .models import db
 load_dotenv()
 
 csrf = CSRFProtect()
+migrate = Migrate()
 
 _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
@@ -74,6 +76,7 @@ def create_app(config_override=None, testing_config=None):
         app.config[key] = value
 
     db.init_app(app)
+    migrate.init_app(app, db)
     csrf.init_app(app)
 
     register_template_globals(app)

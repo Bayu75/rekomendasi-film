@@ -27,7 +27,7 @@
 {%- set score = (similarity * 100) | round | int -%}
 {%- if score >= 80 %}{% set c = 'bg-primary/15 text-primary border-primary/30' %}{% set t = 'text-primary' %}
 {%- elif score >= 60 %}{% set c = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' %}{% set t = 'text-emerald-400' %}
-{%- else %}{% set c = 'bg-zinc-700/30 text-zinc-400 border-zinc-600/40' %}{% set t = 'text-zinc-400' %}{% endif -%}
+{%- else %}{% set c = 'bg-muted text-muted-foreground border-border' %}{% set t = 'text-muted-foreground' %}{% endif -%}
 {%- if size == 'lg' %}
 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border {{ c }}">
   <div class="relative w-8 h-8">
