@@ -34,8 +34,9 @@ main = Blueprint("main", __name__)
 PER_PAGE = 24
 N_POPULER = 10
 N_PERSONAL = 8
-N_DETAIL = 10
+N_DETAIL = 6
 N_SERUPA = 12
+N_KANDIDAT_SERUPA = 60
 N_RIWAYAT_MODEL = 10
 N_RIWAYAT_PREVIEW = 5
 
@@ -61,6 +62,41 @@ def _format_sutradara(nilai):
     return ", ".join(bagian)
 
 
+def _format_durasi(menit):
+    """Ubah menit menjadi teks seperti '2 j 32 m'. None atau <= 0 menjadi None."""
+    if menit is None:
+        return None
+    try:
+        total = int(menit)
+    except (TypeError, ValueError):
+        return None
+    if total <= 0:
+        return None
+    jam, sisa = divmod(total, 60)
+    if jam and sisa:
+        return f"{jam} j {sisa} m"
+    if jam:
+        return f"{jam} j"
+    return f"{sisa} m"
+
+
+def _parse_cast(cast_list):
+    """Ubah 'Nama::Peran|Nama2::Peran2' menjadi daftar {name, character}."""
+    if not cast_list:
+        return []
+    hasil = []
+    for item in str(cast_list).split("|"):
+        item = item.strip()
+        if not item:
+            continue
+        bagian = item.split("::", 1)
+        nama = bagian[0].strip()
+        peran = bagian[1].strip() if len(bagian) > 1 else ""
+        if nama:
+            hasil.append({"name": nama, "character": peran})
+    return hasil
+
+
 def _film_ke_dict(movie: Movie) -> dict:
     """Bentuk dict film sesuai kebutuhan kartu dan halaman detail."""
     vote = movie.vote_average
@@ -75,8 +111,8 @@ def _film_ke_dict(movie: Movie) -> dict:
         "vote_average": float(vote) if vote is not None else None,
         "vote_count": int(movie.vote_count or 0),
         "poster_url": _poster_url(movie.poster_path),
-        "duration": None,
-        "cast": [],
+        "duration": _format_durasi(movie.runtime),
+        "cast": _parse_cast(movie.cast_list),
     }
 
 
@@ -93,9 +129,14 @@ def _lengkapi_hasil_model(items: list[dict]) -> list[dict]:
     for item in items:
         data = dict(item)
         movie = by_id.get(int(item["id"]))
-        data["poster_url"] = _poster_url(movie.poster_path if movie is not None else None)
-        data.setdefault("duration", None)
-        data.setdefault("cast", data.get("shared_cast") or [])
+        if movie is not None:
+            data["poster_url"] = _poster_url(movie.poster_path)
+            data["duration"] = _format_durasi(movie.runtime)
+            data["cast"] = _parse_cast(movie.cast_list)
+        else:
+            data["poster_url"] = _poster_url(None)
+            data.setdefault("duration", None)
+            data.setdefault("cast", data.get("shared_cast") or [])
         hasil.append(data)
     return hasil
 
@@ -148,6 +189,125 @@ def _rekomendasi(movie_id: int, n: int) -> list[dict]:
     except KeyError:
         # Film ada di database tetapi tidak ada di model
         return []
+
+
+def _cocok_genre(item, genre):
+    if not genre:
+        return True
+    target = str(genre).strip().lower()
+    return any(str(g).strip().lower() == target for g in (item.get("genres") or []))
+
+
+def _cocok_tahun(tahun_film, filter_tahun):
+    if filter_tahun in (None, ""):
+        return True
+    if tahun_film is None:
+        return False
+    try:
+        tahun_film = int(tahun_film)
+    except (TypeError, ValueError):
+        return False
+    teks = str(filter_tahun).strip().lower()
+    if teks.endswith("-an") and teks[:-3].isdigit():
+        awal = int(teks[:-3])
+        return awal <= tahun_film < awal + 10
+    if teks.endswith("s") and teks[:-1].lstrip("-").isdigit():
+        awal = int(teks[:-1])
+        return awal <= tahun_film < awal + 10
+    try:
+        if teks.startswith(">="):
+            return tahun_film >= int(float(teks[2:]))
+        if teks.startswith("<="):
+            return tahun_film <= int(float(teks[2:]))
+        if teks.startswith(">"):
+            return tahun_film > int(float(teks[1:]))
+        if teks.startswith("<"):
+            return tahun_film < int(float(teks[1:]))
+        if "-" in teks:
+            kiri, kanan = teks.split("-", 1)
+            if kiri.strip().lstrip("-").isdigit() and kanan.strip().lstrip("-").isdigit():
+                return int(kiri) <= tahun_film <= int(kanan)
+        return tahun_film == int(float(teks))
+    except (TypeError, ValueError):
+        return False
+
+
+def _cocok_rating(item, filter_rating):
+    if filter_rating in (None, ""):
+        return True
+    nilai = item.get("vote_average")
+    if nilai is None:
+        return False
+    teks = str(filter_rating).strip().replace(",", ".")
+    if teks.startswith(">="):
+        teks = teks[2:]
+    elif teks.startswith(">"):
+        teks = teks[1:]
+    try:
+        ambang = float(teks)
+    except (TypeError, ValueError):
+        return False
+    return float(nilai) >= ambang
+
+
+def _nilai_kemiripan(item):
+    sim = item.get("similarity")
+    if sim is None:
+        return -1.0
+    try:
+        return float(sim)
+    except (TypeError, ValueError):
+        return -1.0
+
+
+def _urutkan_serupa(items, urut):
+    if urut == "rating":
+        return sorted(
+            items,
+            key=lambda item: (
+                -(item.get("vote_average") if item.get("vote_average") is not None else -1.0),
+                -_nilai_kemiripan(item),
+            ),
+        )
+    if urut == "tahun":
+        return sorted(
+            items,
+            key=lambda item: (
+                item.get("release_year") is None,
+                -(item.get("release_year") or 0),
+                -_nilai_kemiripan(item),
+            ),
+        )
+    return items
+
+
+def get_similar(movie_id, n, genre=None, tahun=None, rating=None, urut="kemiripan"):
+    """Ambil rekomendasi, opsional filter/urut, lalu potong menjadi n item.
+
+    Untuk filter atau pengurutan selain kemiripan, kandidat diambil lebih banyak
+    (N_KANDIDAT_SERUPA) agar hasil setelah filter tidak cepat habis.
+    Mengembalikan (hasil, jumlah_setelah_filter, jumlah_kandidat).
+    """
+    urut = (urut or "kemiripan").strip().lower()
+    if urut not in {"kemiripan", "rating", "tahun"}:
+        urut = "kemiripan"
+    genre = (str(genre).strip() or None) if genre not in (None, "") else None
+    tahun = (str(tahun).strip() or None) if tahun not in (None, "") else None
+    rating = (str(rating).strip() or None) if rating not in (None, "") else None
+
+    ada_filter = bool(genre or tahun or rating)
+    butuh_pool = ada_filter or urut != "kemiripan"
+    jumlah = max(int(n), N_KANDIDAT_SERUPA) if butuh_pool else int(n)
+    kandidat = _rekomendasi(movie_id, jumlah)
+    tersaring = [
+        item
+        for item in kandidat
+        if _cocok_genre(item, genre)
+        and _cocok_tahun(item.get("release_year"), tahun)
+        and _cocok_rating(item, rating)
+    ]
+    tersaring = _urutkan_serupa(tersaring, urut)
+    return tersaring[: int(n)], len(tersaring), len(kandidat)
 
 
 def _rekomendasi_personal(history_ids: list[int], n: int = N_PERSONAL) -> list[dict]:
@@ -320,39 +480,70 @@ def movie_detail(movie_id):
         except Exception:
             why = None
 
+    film = _film_ke_dict(movie)
+    rekomendasi, _, _ = get_similar(movie.id, N_DETAIL)
     return render_template(
         "pages/movie_detail.html",
-        movie=_film_ke_dict(movie),
-        recommendations=_rekomendasi(movie.id, N_DETAIL),
+        movie=film,
+        recommendations=rekomendasi,
         source_movie=source_movie,
         why=why,
-        runtime_str=None,
-        cast=[],
+        runtime_str=film["duration"],
+        cast=film["cast"],
     )
 
 
 @main.route("/cari-serupa")
 def find_similar():
+    film_raw = request.args.get("film")
     selected_raw = request.args.get("selected")
-    show_results = request.args.get("hasil") == "1"
     query = (request.args.get("q") or "").strip()
+    genre = (request.args.get("genre") or "").strip() or None
+    tahun = (request.args.get("tahun") or "").strip() or None
+    rating = (request.args.get("rating") or "").strip() or None
+    urut = (request.args.get("urut") or "kemiripan").strip() or "kemiripan"
+    if urut.lower() not in {"kemiripan", "rating", "tahun"}:
+        urut = "kemiripan"
+    else:
+        urut = urut.lower()
 
-    selected_movie = None
-    if selected_raw not in (None, ""):
+    # Parameter baru `film` menampilkan hasil langsung. `selected` + `hasil=1`
+    # tetap didukung agar tautan template yang ada tidak rusak.
+    id_acuan = None
+    if film_raw not in (None, ""):
         try:
-            selected_id = int(selected_raw)
+            id_acuan = int(film_raw)
         except (TypeError, ValueError):
             abort(404)
-        terpilih = db.session.get(Movie, selected_id)
+    elif selected_raw not in (None, ""):
+        try:
+            id_acuan = int(selected_raw)
+        except (TypeError, ValueError):
+            abort(404)
+
+    tampilkan_langsung = film_raw not in (None, "")
+    show_results = tampilkan_langsung or request.args.get("hasil") == "1"
+
+    selected_movie = None
+    if id_acuan is not None:
+        terpilih = db.session.get(Movie, id_acuan)
         if terpilih is None:
             abort(404)
         selected_movie = _film_ke_dict(terpilih)
 
     similar_movies: list[dict] = []
+    filtered_count = 0
+    total_candidates = 0
     if selected_movie and show_results:
-        similar_movies = _rekomendasi(selected_movie["id"], N_SERUPA)
+        similar_movies, filtered_count, total_candidates = get_similar(
+            selected_movie["id"],
+            N_SERUPA,
+            genre=genre,
+            tahun=tahun,
+            rating=rating,
+            urut=urut,
+        )
 
-    # Hasil pencarian judul acuan (untuk template setelah form ?q= siap)
     search_results: list[dict] = []
     if query and selected_movie is None:
         rows = (
@@ -371,6 +562,14 @@ def find_similar():
         popular_movies=_populer(N_POPULER),
         query=query,
         search_results=search_results,
+        film=id_acuan,
+        genre=genre,
+        tahun=tahun,
+        rating=rating,
+        urut=urut,
+        filtered_count=filtered_count,
+        total_candidates=total_candidates,
+        all_genres=ALL_GENRES,
     )
 
 
