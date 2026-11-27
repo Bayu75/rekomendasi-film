@@ -32,6 +32,198 @@
       ) }}
     </div>
 
+
+    <!-- Riwayat Pencarian -->
+    {% if g.user and not has_searched and history %}
+    <section style="
+        margin-bottom: 32px;
+        padding: 20px;
+        background: #121218;
+        border: 1px solid #292932;
+        border-radius: 18px;
+        box-sizing: border-box;
+        width: 100%;
+    ">
+
+      <!-- Header -->
+      <div style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 18px;
+      ">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span style="color:#f5c518; font-size:17px;">◷</span>
+
+          <span style="font-size:14px; font-weight:700; color:#f4f4f5;">
+            Riwayat Pencarian
+          </span>
+
+          <span style="
+              padding:3px 9px;
+              border-radius:20px;
+              background:#202027;
+              color:#85859a;
+              font-size:11px;
+          ">
+            {{ history_count }} film
+          </span>
+        </div>
+
+        <form method="POST"
+              action="{{ url_for('main.clear_history') }}"
+              onsubmit="return confirm('Yakin ingin menghapus seluruh riwayat pencarian?');"
+              style="margin:0;">
+          <button type="submit" style="
+              border:0;
+              background:transparent;
+              color:#85859a;
+              font-size:12px;
+              cursor:pointer;
+              white-space:nowrap;
+          ">
+            🗑️ Hapus Riwayat
+          </button>
+        </form>
+      </div>
+
+      <!-- Daftar Film -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        {% for movie in history %}
+
+        <div style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:12px;
+            min-height:80px;
+            box-sizing:border-box;
+            background:#191920;
+            border-radius:12px;
+        ">
+          <!-- Link Film -->
+          <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}"
+             style="
+                 display:flex;
+                 align-items:center;
+                 gap:12px;
+                 flex:1;
+                 min-width:0;
+                 text-decoration:none;
+                 color:inherit;
+             ">
+
+            <!-- Poster -->
+            <div style="
+                width:40px;
+                height:56px;
+                flex-shrink:0;
+                overflow:hidden;
+                border-radius:6px;
+                background:#292932;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+              {% if movie.poster_url %}
+              <img src="{{ movie.poster_url }}"
+                   alt="{{ movie.title }}"
+                   style="width:100%; height:100%; object-fit:cover;">
+              {% else %}
+              <span style="color:#f5c518; font-weight:700;">
+                {{ movie.title[:1] }}
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Informasi Film -->
+            <div style="flex:1; min-width:0;">
+              <p style="
+                  margin:0;
+                  color:#f4f4f5;
+                  font-size:14px;
+                  font-weight:700;
+                  overflow:hidden;
+                  text-overflow:ellipsis;
+                  white-space:nowrap;
+              ">
+                {{ movie.title }}
+              </p>
+
+              <p style="
+                  margin:4px 0 0;
+                  color:#85859a;
+                  font-size:12px;
+                  overflow:hidden;
+                  text-overflow:ellipsis;
+                  white-space:nowrap;
+              ">
+                {% if movie.release_year %}{{ movie.release_year }}{% endif %}
+                {% if movie.genres %} · {{ movie.genres|join(', ') }}{% endif %}
+              </p>
+            </div>
+
+          </a>
+
+          <!-- Tombol Hapus -->
+          <form method="POST"
+                action="{{ url_for('main.clear_single_history', movie_id=movie.id) }}"
+                onsubmit="return confirm('Hapus film ini dari riwayat pencarian?');"
+                style="margin:0; flex-shrink:0;">
+
+            <button type="submit"
+                    title="Hapus dari riwayat"
+                    style="
+                        border:0;
+                        background:transparent;
+                        cursor:pointer;
+                        font-size:16px;
+                        padding:5px;
+                    ">
+              🗑️
+            </button>
+          </form>
+
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Footer -->
+      <div style="
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          flex-wrap:wrap;
+          gap:10px;
+          margin-top:16px;
+          padding-top:14px;
+          border-top:1px solid #292932;
+      ">
+        <p style="margin:0; color:#85859a; font-size:12px;">
+          Riwayat ini digunakan untuk
+          <span style="color:#f5c518; font-weight:600;">
+            Rekomendasi Untukmu
+          </span>
+          di beranda.
+        </p>
+
+        <a href="{{ url_for('main.home') }}"
+           style="
+               color:#f5c518;
+               font-size:12px;
+               font-weight:700;
+               text-decoration:none;
+               white-space:nowrap;
+           ">
+          Lihat Rekomendasi →
+        </a>
+      </div>
+
+    </section>
+    {% endif %}
+
+
     <!-- Genre Filter -->
     <div class="flex flex-wrap gap-2 mb-10">
       <a href="{{ url_for('main.explore') }}"
@@ -67,6 +259,8 @@
       </h2>
     </div>
 
+
+
     <!-- Movie Grid -->
     {% if movies|default([]) %}
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -82,6 +276,136 @@
         action_label='Tampilkan Semua Film'
       ) }}
     {% endif %}
+
+    <!-- Pagination -->
+    {% if total_pages|default(1) > 1 %}
+    <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        width: 100%;
+        margin: 48px auto 24px;
+    ">
+
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        ">
+
+            <!-- Halaman Pertama -->
+            {% if page > 1 %}
+            <a href="{{ url_for('main.explore', page=1, q=query or None, genre=active_genre or None) }}"
+               title="Halaman pertama"
+               style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #f5c518; font-size: 23px; text-decoration: none;">
+                «
+            </a>
+            {% else %}
+            <span style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #555560; font-size: 23px;">
+                «
+            </span>
+            {% endif %}
+
+            <!-- Halaman Sebelumnya -->
+            {% if has_prev %}
+            <a href="{{ url_for('main.explore', page=page-1, q=query or None, genre=active_genre or None) }}"
+               title="Halaman sebelumnya"
+               style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #f5c518; font-size: 23px; text-decoration: none;">
+                ‹
+            </a>
+            {% else %}
+            <span style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #555560; font-size: 23px;">
+                ‹
+            </span>
+            {% endif %}
+
+            <!-- Input Nomor Halaman -->
+            <form method="get"
+                  action="{{ url_for('main.explore') }}"
+                  style="margin: 0;">
+
+                {% if query %}
+                <input type="hidden" name="q" value="{{ query }}">
+                {% endif %}
+
+                {% if active_genre %}
+                <input type="hidden" name="genre" value="{{ active_genre }}">
+                {% endif %}
+
+                <input
+                    type="number"
+                    name="page"
+                    value="{{ page }}"
+                    min="1"
+                    max="{{ total_pages }}"
+                    required
+                    aria-label="Masukkan nomor halaman"
+                    style="
+                        display: block;
+                        width: 68px;
+                        height: 44px;
+                        box-sizing: border-box;
+                        border: none;
+                        border-radius: 9px;
+                        background: #f5c518;
+                        color: #111116;
+                        text-align: center;
+                        vertical-align: middle;
+                        line-height: 44px;
+                        font-size: 19px;
+                        font-weight: 800;
+                        padding: 0;
+                        outline: none;
+                    "
+                >
+            </form>
+
+            <!-- Halaman Selanjutnya -->
+            {% if has_next %}
+            <a href="{{ url_for('main.explore', page=page+1, q=query or None, genre=active_genre or None) }}"
+               title="Halaman selanjutnya"
+               style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #f5c518; font-size: 23px; text-decoration: none;">
+                ›
+            </a>
+            {% else %}
+            <span style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #555560; font-size: 23px;">
+                ›
+            </span>
+            {% endif %}
+
+            <!-- Halaman Terakhir -->
+            {% if page < total_pages %}
+            <a href="{{ url_for('main.explore', page=total_pages, q=query or None, genre=active_genre or None) }}"
+               title="Halaman terakhir"
+               style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #f5c518; font-size: 23px; text-decoration: none;">
+                »
+            </a>
+            {% else %}
+            <span style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30303a; border-radius: 9px; color: #555560; font-size: 23px;">
+                »
+            </span>
+            {% endif %}
+
+        </div>
+
+        <!-- Informasi Halaman -->
+        <p style="
+            margin: 0;
+            color: #85859a;
+            font-size: 14px;
+            text-align: center;
+        ">
+            Halaman
+            <span style="color: #f5c518; font-weight: 800;">{{ page }}</span>
+            dari {{ total_pages }}
+        </p>
+
+    </div>
+    {% endif %}
+
 
   </div>
 </section>

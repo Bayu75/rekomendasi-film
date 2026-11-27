@@ -11,9 +11,9 @@
      style="padding-top: 100px;">
 
     <!-- Tombol Kembali -->
-    <a href="{{ request.args.get('from') if request.args.get('from') in ['/explore', '/cari-serupa'] else url_for('main.explore') }}"
+    <a href="{{ request.args.get('from') if request.args.get('from', '').startswith(('/explore', '/cari-serupa')) else url_for('main.explore') }}"
     class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8">
-    <span>‹</span> Kembali
+        <span>‹</span> Kembali
     </a>
 
     <!-- Informasi Utama Film -->
@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      
+
     <!-- Detail Film -->
     <div style="display: flex; flex-direction: column; align-items: flex-start; padding-top: 0;">
 
@@ -55,7 +55,9 @@
     <!-- Tahun, Durasi, Rating -->
     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 30px; margin-bottom: 36px; font-size: 16px; font-weight: 700;">
         <span class="text-foreground">{{ movie.release_year }}</span>
-        <span class="text-muted-foreground">{{ movie.duration }}</span>
+        {% if movie.duration %}
+            <span class="text-muted-foreground">{{ movie.duration }}</span>
+        {% endif %}
         <span class="text-primary">★ {{ movie.vote_average }}</span>
     </div>
 
@@ -67,10 +69,12 @@
             <p class="text-foreground font-bold" style="font-size: 16px;">{{ movie.director }}</p>
         </div>
 
+        {% if movie.duration %}
         <div>
             <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Durasi</p>
             <p class="text-foreground font-bold" style="font-size: 16px;">{{ movie.duration }}</p>
         </div>
+        {% endif %}
 
         <div>
             <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Rating</p>
@@ -98,8 +102,8 @@
 
     </div>
 
-    
-    
+
+
     <!-- Sinopsis, Pemeran, dan Informasi Film -->
     <style>
     .detail-lower {
@@ -278,33 +282,38 @@
         <p class="detail-overview">{{ movie.overview }}</p>
         </section>
 
+        {% if movie.cast %}
         <!-- Pemeran Utama -->
         <section>
-        <h2 class="detail-heading">Pemeran Utama</h2>
+            <h2 class="detail-heading">Pemeran Utama</h2>
 
-        <div class="cast-grid">
-            {% for actor in movie.cast %}
-            <div class="cast-item">
-            <div class="cast-avatar">
-                {{ actor.name[:1] }}
+            <div class="cast-grid">
+                {% for actor in movie.cast %}
+                <div class="cast-item">
+                    <div class="cast-avatar">
+                        {{ actor.name[:1] }}
+                    </div>
+                    <p class="cast-name">{{ actor.name }}</p>
+                    <p class="cast-character">{{ actor.character }}</p>
+                </div>
+                {% endfor %}
             </div>
-            <p class="cast-name">{{ actor.name }}</p>
-            <p class="cast-character">{{ actor.character }}</p>
-            </div>
-            {% endfor %}
-        </div>
         </section>
+        {% endif %}
 
-        <!-- Tema dan Kata Kunci -->
+
+       <!-- Tema dan Kata Kunci -->
+        {% if movie.keywords %}
         <section>
-        <h2 class="detail-heading">Tema &amp; Kata Kunci</h2>
+            <h2 class="detail-heading">Tema &amp; Kata Kunci</h2>
 
-        <div class="keyword-list">
-            {% for keyword in movie.keywords %}
-            <span class="keyword-item">#{{ keyword }}</span>
-            {% endfor %}
-        </div>
+            <div class="keyword-list">
+                {% for keyword in movie.keywords %}
+                <span class="keyword-item">#{{ keyword }}</span>
+                {% endfor %}
+            </div>
         </section>
+        {% endif %}
 
     </div>
 
@@ -326,10 +335,12 @@
             <span class="info-value">{{ movie.director }}</span>
             </div>
 
+            {% if movie.duration %}
             <div class="info-row">
-            <span class="info-label">Durasi</span>
-            <span class="info-value">{{ movie.duration }}</span>
+                <span class="info-label">Durasi</span>
+                <span class="info-value">{{ movie.duration }}</span>
             </div>
+            {% endif %}
 
             <div class="info-row">
             <span class="info-label">Rating IMDb</span>
@@ -354,7 +365,7 @@
 
 
 
-    
+
     <!-- Film Serupa -->
     <style>
     .similar-section {
@@ -524,7 +535,7 @@
     <div class="similar-header">
         <div>
         <span class="similar-label">
-            ▣ FILM SERUPA 
+            ▣ FILM SERUPA
         </span>
 
         <h2 class="similar-title">Film Serupa</h2>

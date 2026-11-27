@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, render_template
 
 from .genre_styles import register_template_globals
 from .models import db
@@ -27,6 +27,10 @@ def create_app():
 
     app.register_blueprint(main)
     app.register_blueprint(auth)
+
+    @app.errorhandler(404)
+    def halaman_tidak_ditemukan(error):
+        return render_template("errors/404.html"), 404
 
     with app.app_context():
         db.create_all()
