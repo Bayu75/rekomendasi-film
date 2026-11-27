@@ -543,7 +543,7 @@
 
     {% endif %}
 
-    
+
     <!-- PROGRESS STEPS -->
     <div class="similar-progress">
 
@@ -609,7 +609,7 @@
     <div class="result-movie">
 
         <span class="similarity-badge">
-        ● {{ movie.similarity }}% Mirip
+            ● {{ (movie.similarity * 100)|round|int }}% Mirip
         </span>
 
         {{ movie_card(movie, index=loop.index0) }}
@@ -712,52 +712,83 @@
         Langkah 1: Cari Film Acuan
       </h2>
 
-      <div class="similar-search-box">
+      <form method="get"
+            action="{{ url_for('main.find_similar') }}"
+            class="similar-search-box">
 
         <span style="color: #85859a; font-size: 20px;">⌕</span>
 
         <input
           type="text"
           id="movie-search"
+          name="q"
+          value="{{ query|default('') }}"
           placeholder="Cari film yang ingin kamu jadikan acuan..."
         >
 
-        <button type="button" class="similar-search-button">
+        <button type="submit" class="similar-search-button">
           Cari
         </button>
 
-      </div>
+      </form>
 
     </div>
 
-    <!-- FILM POPULER -->
-    <div class="popular-movies">
+    {% if query %}
+      <!-- HASIL PENCARIAN -->
+      <div class="popular-movies">
+        <p class="popular-heading">
+          Hasil pencarian untuk "{{ query }}":
+        </p>
 
-      <p class="popular-heading">
-        Atau pilih dari film populer:
-      </p>
+        {% if search_results %}
+          <div class="popular-grid">
+            {% for movie in search_results %}
+              <div class="movie-option">
+                {{ movie_card(movie, index=loop.index0) }}
 
-      <div class="popular-grid">
+                <a
+                  href="{{ url_for('main.find_similar', selected=movie.id) }}"
+                  class="select-movie-button"
+                >
+                  Pilih
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="popular-heading">
+            Film "{{ query }}" tidak ditemukan. Coba kata kunci lain.
+          </p>
+        {% endif %}
+      </div>
 
-        {% for movie in popular_movies %}
-        <div class="movie-option">
+    {% else %}
+      <!-- FILM POPULER -->
+      <div class="popular-movies">
 
-          <!-- Card yang sama dengan Explore -->
-          {{ movie_card(movie, index=loop.index0) }}
+        <p class="popular-heading">
+          Atau pilih dari film populer:
+        </p>
 
-          <!-- Tombol Pilih -->
-          <a
-            href="{{ url_for('main.find_similar', selected=movie.id) }}"
-            class="select-movie-button"
-          >
-            Pilih
-          </a>
+        <div class="popular-grid">
+          {% for movie in popular_movies %}
+            <div class="movie-option">
+              {{ movie_card(movie, index=loop.index0) }}
 
+              <a
+                href="{{ url_for('main.find_similar', selected=movie.id) }}"
+                class="select-movie-button"
+              >
+                Pilih
+              </a>
+            </div>
+          {% endfor %}
         </div>
-        {% endfor %}
 
       </div>
-    </div>
+    {% endif %}
+
 
     {% endif %}
 

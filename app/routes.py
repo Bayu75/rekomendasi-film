@@ -243,8 +243,10 @@ def explore():
 
     has_searched = bool(query or active_genre)
     history = []
+    history_count = 0
+
     if g.get("user") and not has_searched:
-        history, _, _ = _riwayat_pengguna(g.user.id)
+        history, history_count, _ = _riwayat_pengguna(g.user.id)
 
     return render_template(
         "pages/explore.html",
@@ -256,6 +258,7 @@ def explore():
         total_movies=Movie.query.count(),
         has_searched=has_searched,
         history=history,
+        history_count=history_count,
         pagination={
             "page": page,
             "per_page": PER_PAGE,
@@ -338,5 +341,17 @@ def find_similar():
 @login_required
 def clear_history():
     SearchHistory.query.filter_by(user_id=g.user.id).delete()
+    db.session.commit()
+    return redirect(url_for("main.explore"))
+
+
+@main.route("/riwayat/hapus/<int:movie_id>", methods=["POST"])
+@login_required
+def clear_single_history(movie_id):
+    SearchHistory.query.filter_by(
+        user_id=g.user.id,
+        movie_id=movie_id
+    ).delete()
+
     db.session.commit()
     return redirect(url_for("main.explore"))

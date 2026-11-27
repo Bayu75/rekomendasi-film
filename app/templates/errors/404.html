@@ -1,0 +1,89 @@
+
+{% extends "base.html" %}
+
+{% block title %}404 - Halaman Tidak Ditemukan | MovieMatch{% endblock %}
+
+{% block content %}
+<section style="
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 90px 24px 40px;
+    box-sizing: border-box;
+    background: #09090c;
+    text-align: center;
+">
+
+  <div style="max-width: 520px; width: 100%;">
+
+    <!-- Ilustrasi -->
+    <div style="
+        width: 110px;
+        height: 110px;
+        margin: 0 auto 28px;
+        border-radius: 28px;
+        background: #242027;
+        border: 1px solid #4b3b16;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 54px;
+    ">
+      🎬
+    </div>
+
+    <!-- Nomor Error -->
+    <h1 style="
+        margin: 0;
+        color: #f5c518;
+        font-size: clamp(76px, 15vw, 112px);
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: -5px;
+    ">
+      404
+    </h1>
+
+    <h2 style="
+        margin: 18px 0 10px;
+        color: #f4f4f5;
+        font-size: 25px;
+        font-weight: 800;
+    ">
+      Oops! Filmnya Hilang?
+    </h2>
+
+    <p style="
+        margin: 0 auto;
+        max-width: 390px;
+        color: #85859a;
+        font-size: 14px;
+        line-height: 1.8;
+    ">
+      Sepertinya halaman yang kamu cari tidak ditemukan.
+      Mungkin sudah dipindahkan atau alamatnya salah.
+    </p>
+
+    <!-- Tombol Kembali -->
+    <a href="{{ url_for('main.home') }}"
+       style="
+           display: inline-flex;
+           align-items: center;
+           justify-content: center;
+           gap: 8px;
+           margin-top: 30px;
+           padding: 13px 24px;
+           border-radius: 10px;
+           background: #f5c518;
+           color: #111116;
+           font-size: 14px;
+           font-weight: 800;
+           text-decoration: none;
+       ">
+      ← Kembali ke Beranda
+    </a>
+
+  </div>
+</section>
+{% endblock %}

@@ -3,7 +3,7 @@
 
 
 {% macro movie_card(movie, similarity=None, href=None, action_label=None, action_url=None, index=None, delay_step=40) -%}
-{%- set link = href or url_for('main.movie_detail', movie_id=movie.id, **{'from': request.path}) -%}
+{%- set link = href or url_for('main.movie_detail', movie_id=movie.id, **{'from': request.full_path.rstrip('?')}) -%}
 {%- set title = movie.title or 'Tanpa Judul' -%}
 {%- set initials = (title.split()[:2] | map('first') | join | upper) -%}
 {%- set director = (movie.director or '').split(',')[0] | trim -%}
