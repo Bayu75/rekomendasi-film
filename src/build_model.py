@@ -2,7 +2,7 @@
 
 Pemakaian::
 
-    python -m src.build_model --csv data/movies_clean_final.csv --out models/recommender.joblib
+    python -m src.build_model --csv data/processed/movies_clean_final.csv --out models/recommender.joblib
 
 Artefak berisi: vectorizer TF-IDF, matriks TF-IDF sparse (sudah L2-normalized sehingga
 cosine similarity = perkalian titik), tabel film, dan konfigurasi. Matriks similarity
@@ -16,6 +16,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import sklearn
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from .preprocessing import build_tags, prepare_movies
@@ -94,6 +95,7 @@ def build_bundle(df_raw: pd.DataFrame, **overrides) -> dict:
     movies["rating_score"] = weighted_rating(movies, config["min_votes_quantile"]).to_numpy()
     return {
         "version": ARTIFACT_VERSION,
+        "sklearn_version": sklearn.__version__,  # untuk peringatan jika versi saat dimuat berbeda
         "config": config,
         "vectorizer": vectorizer,
         "matrix": matrix,

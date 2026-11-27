@@ -13,7 +13,8 @@ Lokasi artefak: env ``MOVIEMATCH_MODEL`` atau ``models/recommender.joblib`` di a
 Setiap item hasil adalah dict berisi tipe Python biasa (aman untuk Jinja dan ``json.dumps``)::
 
     id, title, release_year (int|None), genres (list), director, vote_average, vote_count,
-    overview, keywords (list), similarity (0..1, None pada popular()), score,
+    overview, keywords (list), similarity (0..1, None pada popular()),
+    similarity_percent (int 0..100 untuk ditampilkan, None pada popular()), score,
     reasons (list[str]), source_movie_id (int|None),
     shared_genres (list), shared_keywords (list), same_director (bool), shared_cast ([])
 """
@@ -21,11 +22,13 @@ from __future__ import annotations
 
 import os
 import threading
+import warnings
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
+import sklearn
 
 from .preprocessing import split_list
 
@@ -37,6 +40,15 @@ class Recommender:
 
     def __init__(self, bundle: dict):
         self.config: dict = bundle["config"]
+        self.sklearn_version: str | None = bundle.get("sklearn_version")
+        if self.sklearn_version and self.sklearn_version != sklearn.__version__:
+            warnings.warn(
+                f"Artefak model dibuat dengan scikit-learn {self.sklearn_version}, tetapi yang terpasang "
+                f"{sklearn.__version__}. Samakan versinya atau bangun ulang artefak "
+                "(`python -m src.build_model`).",
+                RuntimeWarning,
+                stacklevel=2,
+            )
         self.matrix = bundle["matrix"]  # csr, baris L2-normalized
         self.movies = bundle["movies"].reset_index(drop=True)
 
@@ -55,6 +67,15 @@ class Recommender:
     # ------------------------------------------------------------------ util
     def __len__(self) -> int:
         return len(self.movies)
+
+    def info(self) -> dict:
+        """Ringkasan model untuk pengecekan Backend saat aplikasi start."""
+        return {
+            "n_movies": len(self),
+            "n_features": int(self.matrix.shape[1]),
+            "sklearn_version": self.sklearn_version,
+            "config": dict(self.config),
+        }
 
     def has_movie(self, movie_id: int) -> bool:
         return int(movie_id) in self._id_to_idx
@@ -144,6 +165,7 @@ class Recommender:
             "overview": str(row["overview"]),
             "keywords": list(self._keywords[idx]),
             "similarity": None if similarity is None else round(float(similarity), 4),
+            "similarity_percent": None if similarity is None else int(round(float(similarity) * 100)),
             "score": round(float(score), 4),
             "reasons": reasons,
             "source_movie_id": None if src_idx is None else int(self._ids[src_idx]),
@@ -224,7 +246,7 @@ def load_model(path: str | os.PathLike | None = None) -> Recommender:
     if not path.exists():
         raise FileNotFoundError(
             f"Artefak model tidak ditemukan: {path}. Bangun dulu dengan "
-            "`python -m src.build_model --csv data/movies_clean_final.csv`."
+            "`python -m src.build_model --csv data/processed/movies_clean_final.csv`."
         )
     with _lock:
         _model = Recommender(joblib.load(path))
@@ -249,3 +271,8 @@ def recommend_for_user(history_ids: list[int], n: int = 10) -> list[dict]:
 
 def popular(n: int = 10) -> list[dict]:
     return get_model().popular(n)
+
+
+def model_info() -> dict:
+    """Ringkasan model yang sedang dimuat (memuatnya dulu bila belum)."""
+    return get_model().info()
