@@ -71,21 +71,26 @@
           </span>
         </div>
 
-        <form method="POST"
-              action="{{ url_for('main.clear_history') }}"
-              onsubmit="return confirm('Yakin ingin menghapus seluruh riwayat pencarian?');"
-              style="margin:0;">
-          <button type="submit" style="
-              border:0;
-              background:transparent;
-              color:#85859a;
-              font-size:12px;
-              cursor:pointer;
-              white-space:nowrap;
-          ">
-            🗑️ Hapus Riwayat
-          </button>
-        </form>
+      <form method="POST"
+            action="{{ url_for('main.clear_history') }}"
+            onsubmit="return confirm('Yakin ingin menghapus seluruh riwayat pencarian?');"
+            style="margin:0;">
+
+        {%- if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% endif %}
+
+        <button type="submit" style="
+            border:0;
+            background:transparent;
+            color:#85859a;
+            font-size:12px;
+            cursor:pointer;
+            white-space:nowrap;
+        ">
+          🗑️ Hapus Riwayat
+        </button>
+      </form>
       </div>
 
       <!-- Daftar Film -->
@@ -171,6 +176,10 @@
                 action="{{ url_for('main.clear_single_history', movie_id=movie.id) }}"
                 onsubmit="return confirm('Hapus film ini dari riwayat pencarian?');"
                 style="margin:0; flex-shrink:0;">
+
+            {%- if csrf_token is defined %}
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
 
             <button type="submit"
                     title="Hapus dari riwayat"
