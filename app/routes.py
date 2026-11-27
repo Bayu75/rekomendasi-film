@@ -39,9 +39,6 @@ N_SERUPA = 12
 N_RIWAYAT_MODEL = 10
 N_RIWAYAT_PREVIEW = 5
 
-_model_tidak_tersedia = False
-
-
 def _poster_url(poster_path):
     """Ubah poster_path menjadi URL, atau None jika kosong."""
     if not poster_path:
@@ -56,6 +53,14 @@ def _poster_url(poster_path):
     return path
 
 
+def _format_sutradara(nilai):
+    """Ubah 'A|B' dari database menjadi 'A, B' agar sama dengan keluaran model."""
+    if not nilai:
+        return ""
+    bagian = [p.strip() for p in str(nilai).split("|") if p.strip()]
+    return ", ".join(bagian)
+
+
 def _film_ke_dict(movie: Movie) -> dict:
     """Bentuk dict film sesuai kebutuhan kartu dan halaman detail."""
     vote = movie.vote_average
@@ -65,7 +70,7 @@ def _film_ke_dict(movie: Movie) -> dict:
         "overview": movie.overview or "",
         "genres": movie.genre_list,
         "keywords": movie.keyword_list,
-        "director": movie.director or "",
+        "director": _format_sutradara(movie.director),
         "release_year": int(movie.release_year) if movie.release_year is not None else None,
         "vote_average": float(vote) if vote is not None else None,
         "vote_count": int(movie.vote_count or 0),
@@ -95,20 +100,35 @@ def _lengkapi_hasil_model(items: list[dict]) -> list[dict]:
     return hasil
 
 
+_sudah_peringatan_model = False
+
+
 def _get_recommender():
-    """Muat model sekali (lazy). Jika artefak tidak ada, kembalikan None."""
-    global _model_tidak_tersedia
-    if _model_tidak_tersedia:
-        return None
+    """Ambil model yang sudah dimuat, atau coba muat jika belum ada.
+
+    Tidak mengunci status 'tidak tersedia': jika file model muncul kemudian,
+    permintaan berikutnya akan mencoba memuatnya lagi.
+    """
+    global _sudah_peringatan_model
     try:
         from src.recommender import get_model
 
-        return get_model()
+        model = get_model()
+        _sudah_peringatan_model = False
+        return model
     except FileNotFoundError as exc:
-        logger.warning(
-            "Artefak model tidak ditemukan; rekomendasi dikosongkan. %s", exc
-        )
-        _model_tidak_tersedia = True
+        if not _sudah_peringatan_model:
+            logger.warning(
+                "Artefak model tidak ditemukan; rekomendasi dikosongkan. %s", exc
+            )
+            _sudah_peringatan_model = True
+        return None
+    except Exception as exc:
+        if not _sudah_peringatan_model:
+            logger.warning(
+                "Model rekomendasi gagal dimuat; rekomendasi dikosongkan. %s", exc
+            )
+            _sudah_peringatan_model = True
         return None
 
 
@@ -283,12 +303,29 @@ def movie_detail(movie_id):
     if g.get("user"):
         _simpan_riwayat(g.user.id, movie.id)
 
+    dari = request.args.get("dari", type=int)
+    why = None
+    source_movie = None
+    if dari:
+        sumber = db.session.get(Movie, dari)
+        if sumber is not None:
+            source_movie = _film_ke_dict(sumber)
+        try:
+            for item in _rekomendasi(dari, N_SERUPA):
+                if int(item["id"]) == int(movie.id):
+                    why = dict(item)
+                    if source_movie is not None:
+                        why["source_title"] = source_movie["title"]
+                    break
+        except Exception:
+            why = None
+
     return render_template(
         "pages/movie_detail.html",
         movie=_film_ke_dict(movie),
         recommendations=_rekomendasi(movie.id, N_DETAIL),
-        source_movie=None,
-        why=None,
+        source_movie=source_movie,
+        why=why,
         runtime_str=None,
         cast=[],
     )
