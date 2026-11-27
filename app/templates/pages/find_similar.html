@@ -401,129 +401,261 @@
   margin-bottom: 20px;
 }
 
+
+/* GRID DAFTAR FILM REKOMENDASI */
 .results-layout {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+    margin-top: 24px;
 }
 
 .result-movie {
-  min-width: 0;
-  position: relative;
+    position: relative;
+    min-width: 0;
+    width: 100%;
+}
+
+.result-movie .similarity-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 5;
+    margin: 0;
+}
+
+.result-movie > * {
+    max-width: 100%;
 }
 
 .similarity-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 5;
-  padding: 5px 9px;
-  border-radius: 20px;
-  background: var(--color-muted);
-  border: 1px solid var(--color-border);
-  color: var(--color-muted-foreground);  
-  font-size: 11px;
-  font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background: var(--color-card);
+    color: var(--color-muted-foreground);
+    font-size: 11px;
+    font-weight: 700;
 }
 
-.result-detail-link {
-  display: block;
-  margin-top: 10px;
-  padding: 9px;
-  border-radius: 9px;
-  background: #f5c518;
-  color: #111116;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.result-detail-link:hover {
-  background: #e6b600;
-}
-
-@media (max-width: 900px) {
-  .results-layout {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .results-layout {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .results-title {
-    font-size: 24px;
-  }
-}
-
-
-  /* RESPONSIVE */
-  @media (max-width: 768px) {
+/* Tampilan film populer di mobile */
+@media (max-width: 640px) {
     .popular-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 
+    .movie-option {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .movie-option > a.select-movie-button {
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: center;
+    }
+
+    .popular-heading {
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+}
+
+/* Stepper untuk tampilan mobile */
+@media (max-width: 640px) {
     .similar-progress {
-      max-width: 100%;
-    }
-
-    .similar-step-line {
-      min-width: 12px;
-      margin: 0 6px;
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 4px;
+        overflow: visible;
     }
 
     .similar-step {
-      gap: 5px;
-    }
-
-    .similar-step-label {
-      font-size: 10px;
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 7px;
     }
 
     .similar-step-number {
-      width: 30px;
-      height: 30px;
-      font-size: 12px;
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 13px;
     }
-  }
 
-  @media (max-width: 480px) {
+    .similar-step-label {
+        display: block;
+        width: 100%;
+        font-size: 10px;
+        line-height: 1.3;
+        white-space: normal;
+        text-align: center;
+        overflow-wrap: break-word;
+    }
+
+    .similar-step-line {
+        flex: 0 0 18px;
+        min-width: 10px;
+        margin-top: 14px;
+    }
+}
+
+/* RESPONSIVE GRID */
+@media (max-width: 1000px) {
+    .results-layout {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .results-layout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* LAYOUT JUDUL DAN FILTER HASIL */
+.results-header-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
+    gap: 28px;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+/* PANEL FILTER */
+.results-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: end;
+    padding: 16px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.filter-label {
+    color: var(--color-muted-foreground);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.filter-control {
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    padding: 0 10px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-foreground);
+    font-size: 12px;
+    outline: none;
+}
+
+.filter-control:focus {
+    border-color: var(--color-primary);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    grid-column: 1 / -1;
+}
+
+.filter-submit {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #f5c518;
+    color: #111116;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.filter-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-muted-foreground);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+/* Mengembalikan pengaturan mobile kartu konfirmasi */
+@media (max-width: 480px) {
     .similar-page {
-      padding: 85px 16px 48px;
-    }
-
-    .popular-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 85px 16px 48px;
     }
 
     .confirmation-card {
-      padding: 18px;
+        padding: 18px;
     }
 
     .confirmation-movie {
-      gap: 12px;
+        gap: 12px;
     }
 
     .confirmation-poster {
-      width: 90px;
-      height: 135px;
+        width: 90px;
+        height: 135px;
     }
 
     .confirmation-movie-title {
-      font-size: 17px;
+        font-size: 17px;
     }
 
     .confirmation-movie-meta {
-      font-size: 12px;
+        font-size: 12px;
     }
 
     .confirmation-actions {
-      gap: 8px;
+        gap: 8px;
     }
-  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .results-header-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .results-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        grid-column: auto;
+    }
+}
+
 </style>
 
 <section class="similar-page">
@@ -577,33 +709,119 @@
     </div>
 
 
-    {% if selected_movie and show_results %}
+
+{% if selected_movie and show_results %}
 
     <!-- LANGKAH 3: HASIL REKOMENDASI -->
-    <div class="results-heading">
+    <div class="results-header-layout">
 
-    <h2 class="results-title">
-        Film Serupa dengan
-        <span style="color: #f5c518;">"{{ selected_movie.title }}"</span>
-    </h2>
+        <!-- BAGIAN KIRI: JUDUL DAN INFORMASI -->
+        <div class="results-info">
 
-    <p class="results-description">
-        Berikut film dengan karakteristik konten yang serupa.
-    </p>
+            <div class="results-heading">
+                <h2 class="results-title">
+                    Film Serupa dengan
+                    <span style="color: #f5c518;">"{{ selected_movie.title }}"</span>
+                </h2>
+
+                <p class="results-description">
+                    Berikut film dengan karakteristik konten yang serupa.
+                </p>
+            </div>
+
+            <p class="results-count">
+                Menampilkan {{ filtered_count }} dari {{ total_candidates }} film kandidat.
+            </p>
+
+            <a href="{{ url_for('main.find_similar') }}"
+               class="choose-another">
+                ← Ganti Film Acuan
+            </a>
+
+        </div>
+
+        <!-- BAGIAN KANAN: FILTER -->
+        <form method="get"
+              action="{{ url_for('main.find_similar') }}"
+              class="results-filters">
+
+            <input type="hidden" name="film" value="{{ selected_movie.id }}">
+
+            <!-- Filter Genre -->
+            <div class="filter-group">
+                <label class="filter-label" for="filter-genre">Genre</label>
+                <select name="genre" id="filter-genre" class="filter-control">
+                    <option value="">Semua Genre</option>
+                    {% for item_genre in all_genres %}
+                    <option value="{{ item_genre }}"
+                        {% if genre == item_genre %}selected{% endif %}>
+                        {{ item_genre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Filter Tahun -->
+            <div class="filter-group">
+                <label class="filter-label" for="filter-tahun">Tahun Rilis</label>
+                <input
+                    type="text"
+                    name="tahun"
+                    id="filter-tahun"
+                    class="filter-control"
+                    value="{{ tahun or '' }}"
+                    placeholder="Contoh: 2010-2019">
+            </div>
+
+            <!-- Filter Rating -->
+            <div class="filter-group">
+                <label class="filter-label" for="filter-rating">Rating Minimal</label>
+                <input
+                    type="number"
+                    name="rating"
+                    id="filter-rating"
+                    class="filter-control"
+                    value="{{ rating if rating is not none else '' }}"
+                    placeholder="Contoh: 7.5"
+                    min="0"
+                    max="10"
+                    step="0.1">
+            </div>
+
+            <!-- Pengurutan -->
+            <div class="filter-group">
+                <label class="filter-label" for="filter-urut">Urutkan</label>
+                <select name="urut" id="filter-urut" class="filter-control">
+                    <option value="kemiripan" {% if urut == 'kemiripan' %}selected{% endif %}>
+                        Kemiripan Tertinggi
+                    </option>
+                    <option value="rating" {% if urut == 'rating' %}selected{% endif %}>
+                        Rating Tertinggi
+                    </option>
+                    <option value="tahun" {% if urut == 'tahun' %}selected{% endif %}>
+                        Tahun Terbaru
+                    </option>
+                </select>
+            </div>
+
+            <!-- Tombol -->
+            <div class="filter-actions">
+                <button type="submit" class="filter-submit">
+                    Terapkan Filter
+                </button>
+
+                <a href="{{ url_for('main.find_similar', film=selected_movie.id) }}"
+                   class="filter-reset">
+                    Reset
+                </a>
+            </div>
+
+        </form>
+
     </div>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
-    <p class="results-count">
-        {{ similar_movies|length }} film serupa ditemukan · Diurutkan berdasarkan kemiripan tertinggi
-    </p>
-
-    <a href="{{ url_for('main.find_similar') }}"
-        class="choose-another">
-        ← Ganti Film Acuan
-    </a>
-    </div>
-
-    <div class="results-layout">
+{% if similar_movies %}
+<div class="results-layout">
 
     {% for movie in similar_movies %}
     <div class="result-movie">
@@ -613,18 +831,35 @@
         </span>
 
         {{ movie_card(
-          movie,
-          index=loop.index0,
-          href=url_for(
-              'main.movie_detail',
-              movie_id=movie.id,
-              dari=selected_movie.id,
-              **{'from': request.full_path.rstrip('?')}
-          )
-      ) }}
+            movie,
+            index=loop.index0,
+            href=url_for(
+                'main.movie_detail',
+                movie_id=movie.id,
+                dari=selected_movie.id,
+                **{'from': request.full_path.rstrip('?')}
+            )
+        ) }}
 
     </div>
     {% endfor %}
+
+      </div>
+      {% else %}
+      <div style="padding: 40px 20px; text-align: center; background: var(--color-card); border: 1px solid var(--color-border); border-radius: 14px;">
+          <h3 style="color: var(--color-foreground); font-weight: 800; margin-bottom: 8px;">
+              Film tidak ditemukan
+          </h3>
+          <p style="color: var(--color-muted-foreground); font-size: 14px;">
+              Tidak ada film yang sesuai dengan filter tersebut. Coba ubah kriteria pencarianmu.
+          </p>
+          <a href="{{ url_for('main.find_similar', film=selected_movie.id) }}"
+            class="filter-reset"
+            style="margin-top: 16px;">
+              Reset Filter
+          </a>
+      </div>
+      {% endif %}
 
     </div>
 
@@ -654,14 +889,19 @@
       <div class="confirmation-movie">
 
         <div class="confirmation-poster">
-          {% if selected_movie.poster_url %}
-          <img
-            src="{{ selected_movie.poster_url }}"
-            alt="Poster {{ selected_movie.title }}"
-          >
+  {% if selected_movie.poster_url %}
+  <img
+    src="{{ selected_movie.poster_url }}"
+    alt="Poster {{ selected_movie.title }}"
+    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+  >
+
+          <div class="confirmation-poster-fallback" style="display: none;">
+            {{ selected_movie.title[:2] | upper }}
+          </div>
           {% else %}
           <div class="confirmation-poster-fallback">
-            {{ selected_movie.title[:2]|upper }}
+            {{ selected_movie.title[:2] | upper }}
           </div>
           {% endif %}
         </div>
