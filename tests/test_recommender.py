@@ -12,7 +12,7 @@ from src.recommender import Recommender, load_model
 
 ITEM_KEYS = {
     "id", "title", "release_year", "genres", "director", "vote_average", "vote_count",
-    "overview", "keywords", "similarity", "score", "reasons", "source_movie_id",
+    "overview", "keywords", "similarity", "similarity_percent", "score", "reasons", "source_movie_id",
     "shared_genres", "shared_keywords", "same_director", "shared_cast",
 }
 
@@ -222,3 +222,34 @@ def test_multiple_directors():
     top = {r["id"]: r for r in m.recommend(10, 4)}
     assert top[20]["same_director"] is True and "Sutradara sama: Zed Ko" in top[20]["reasons"]
     assert m.popular(len(m))[0]["director"] != "" and "|" not in "".join(r["director"] for r in m.popular(len(m)))
+
+
+# -------------------------------------------------- similarity_percent & info
+def test_similarity_percent(model):
+    for r in model.recommend(10, 4):
+        assert isinstance(r["similarity_percent"], int) and 0 <= r["similarity_percent"] <= 100
+        assert r["similarity_percent"] == round(r["similarity"] * 100)
+    assert all(r["similarity_percent"] is None for r in model.popular(3))
+
+
+def test_model_info_and_version_warning(df):
+    import warnings
+    import sklearn
+    bundle = build_bundle(df, min_df=1)
+    info = Recommender(bundle).info()
+    assert info["n_movies"] == len(df) and info["sklearn_version"] == sklearn.__version__
+    json.dumps(info, default=str)
+
+    bundle["sklearn_version"] = "0.0.1"
+    with pytest.warns(RuntimeWarning, match="scikit-learn"):
+        Recommender(bundle)
+    bundle.pop("sklearn_version")  # artefak lama tanpa versi: tidak boleh error atau memperingatkan
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        Recommender(bundle)
+
+
+def test_module_model_info(tmp_path, df):
+    import src.recommender as rec
+    rec.load_model(save_bundle(build_bundle(df, min_df=1), tmp_path / "m.joblib"))
+    assert rec.model_info()["n_movies"] == len(df)

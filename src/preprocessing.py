@@ -1,6 +1,6 @@
 """Preprocessing data film dan pembentukan kolom ``tags`` (PRD §10, langkah 1).
 
-Input : ``movies_clean_final.csv`` dengan 9 kolom
+Input : ``data/processed/movies_clean_final.csv`` dengan 9 kolom
         id, title, overview, genres_list, keywords_list, director,
         release_year, vote_average, vote_count
 Output: DataFrame bersih (``prepare_movies``) dan teks ``tags`` per film (``build_tags``).

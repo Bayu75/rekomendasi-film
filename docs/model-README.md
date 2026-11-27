@@ -6,9 +6,9 @@ Pemilik: Model (anggota 2). Semua nama fungsi mengikuti kontrak di `PRD.md` §10
 
 ```bash
 pip install -r requirements.txt
-# taruh CSV asli di data/movies_clean_final.csv (tidak di-commit)
-python -m src.build_model --csv data/movies_clean_final.csv --out models/recommender.joblib
-python -m pytest -q                      # 22 tes
+# taruh CSV asli di data/processed/movies_clean_final.csv (tidak di-commit)
+python -m src.build_model --csv data/processed/movies_clean_final.csv --out models/recommender.joblib
+python -m pytest -q                      # 26 tes
 jupyter nbconvert --to notebook --execute --inplace notebooks/model_rekomendasi.ipynb
 ```
 
@@ -25,11 +25,14 @@ recommend_for_user(history_ids, n=10) # history_ids: TERBARU dulu; kosong -> pop
 popular(n=10)                        # similarity = None, source_movie_id = None
 ```
 
-- Artefak dimuat sekali pada pemanggilan pertama. Lokasi: `models/recommender.joblib` atau env `MOVIEMATCH_MODEL`.
-  Untuk app factory Flask, panggil `load_model()` sekali saat start.
+- Artefak dimuat sekali. Lokasi: `models/recommender.joblib` atau env `MOVIEMATCH_MODEL`.
+  Sebaiknya panggil `load_model()` sekali di `create_app` (dalam `try/except FileNotFoundError`), supaya pengunjung
+  pertama tidak menunggu. `model_info()` mengembalikan jumlah film, versi scikit-learn, dan konfigurasi.
+  Jika versi scikit-learn saat memuat berbeda dari saat membangun, muncul `RuntimeWarning`; samakan versinya.
 - Tiap item = dict tipe Python biasa (aman untuk Jinja dan `json.dumps`). Field = kontrak PRD §10
   ditambah `overview` dan `keywords` (dipakai `jinja-components.md`). `shared_cast` selalu `[]` (CSV tidak punya cast, isu #2).
-- `release_year` bisa `None`. `similarity` 0–1; tampilkan `round(similarity × 100)`.
+- `release_year` bisa `None`. `similarity` 0–1; untuk ditampilkan pakai `similarity_percent` (bilangan bulat 0–100,
+  `None` pada `popular()`), jangan menampilkan `similarity` mentah.
 - Film dengan similarity 0 tidak dikembalikan, jadi hasil bisa kurang dari `n` (tampilkan `empty_state` jika kosong).
 - Id di `recommend_for_user` yang tidak ada di data dilewati; hanya 10 film riwayat terbaru dipakai (`max_history`).
 
