@@ -52,22 +52,33 @@
         {{ movie.title }}
     </h1>
 
+    
     <!-- Tahun, Durasi, Rating -->
     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 30px; margin-bottom: 36px; font-size: 16px; font-weight: 700;">
-        <span class="text-foreground">{{ movie.release_year }}</span>
+
+        {% if movie.release_year is not none %}
+            <span class="text-foreground">{{ movie.release_year }}</span>
+        {% endif %}
+
         {% if movie.duration %}
             <span class="text-muted-foreground">{{ movie.duration }}</span>
         {% endif %}
-        <span class="text-primary">★ {{ movie.vote_average }}</span>
+
+        {% if movie.vote_average is not none %}
+            <span class="text-primary">★ {{ movie.vote_average }}</span>
+        {% endif %}
+
     </div>
 
     <!-- Informasi Singkat -->
     <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; width: 100%; margin-bottom: 34px;">
 
+        {% if movie.director %}
         <div>
             <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Sutradara</p>
             <p class="text-foreground font-bold" style="font-size: 16px;">{{ movie.director }}</p>
         </div>
+        {% endif %}
 
         {% if movie.duration %}
         <div>
@@ -76,10 +87,12 @@
         </div>
         {% endif %}
 
+        {% if movie.vote_average is not none %}
         <div>
-            <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Rating</p>
+            <p class="text-muted-foreground" style="font-size: 13px; margin-bottom: 7px;">Rating TMDB</p>
             <p class="text-foreground font-bold" style="font-size: 16px;">{{ movie.vote_average }}/10</p>
         </div>
+        {% endif %}
 
     </div>
 
@@ -319,8 +332,15 @@
 
         <!-- Sinopsis -->
         <section>
-        <h2 class="detail-heading">Sinopsis</h2>
-        <p class="detail-overview">{{ movie.overview }}</p>
+            <h2 class="detail-heading">Sinopsis</h2>
+
+            {% if movie.overview %}
+                <p class="detail-overview">{{ movie.overview }}</p>
+            {% else %}
+                <p class="detail-overview text-muted-foreground">
+                    Sinopsis belum tersedia.
+                </p>
+            {% endif %}
         </section>
 
         {% if movie.cast %}
@@ -332,10 +352,16 @@
                 {% for actor in movie.cast %}
                 <div class="cast-item">
                     <div class="cast-avatar">
-                        {{ actor.name[:1] }}
+                        {{ actor.name[:1] if actor.name else '?' }}
                     </div>
-                    <p class="cast-name">{{ actor.name }}</p>
+
+                    <p class="cast-name">
+                        {{ actor.name or 'Nama tidak tersedia' }}
+                    </p>
+
+                    {% if actor.character %}
                     <p class="cast-character">{{ actor.character }}</p>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -364,17 +390,22 @@
         <div class="info-card">
         <h3 class="info-title">Informasi Film</h3>
 
+        
         <div class="info-list">
 
+            {% if movie.release_year is not none %}
             <div class="info-row">
-            <span class="info-label">Tahun Rilis</span>
-            <span class="info-value">{{ movie.release_year }}</span>
+                <span class="info-label">Tahun Rilis</span>
+                <span class="info-value">{{ movie.release_year }}</span>
             </div>
+            {% endif %}
 
+            {% if movie.director %}
             <div class="info-row">
-            <span class="info-label">Sutradara</span>
-            <span class="info-value">{{ movie.director }}</span>
+                <span class="info-label">Sutradara</span>
+                <span class="info-value">{{ movie.director }}</span>
             </div>
+            {% endif %}
 
             {% if movie.duration %}
             <div class="info-row">
@@ -383,15 +414,19 @@
             </div>
             {% endif %}
 
+            {% if movie.vote_average is not none %}
             <div class="info-row">
-            <span class="info-label">Rating IMDb</span>
-            <span class="info-value">{{ movie.vote_average }}/10</span>
+                <span class="info-label">Rating TMDB</span>
+                <span class="info-value">{{ movie.vote_average }}/10</span>
             </div>
+            {% endif %}
 
+            {% if movie.genres %}
             <div class="info-row">
-            <span class="info-label">Genre</span>
-            <span class="info-value">{{ movie.genres | join(', ') }}</span>
+                <span class="info-label">Genre</span>
+                <span class="info-value">{{ movie.genres | join(', ') }}</span>
             </div>
+            {% endif %}
 
         </div>
         </div>
@@ -617,13 +652,20 @@
             {{ item.title }}
             </h3>
 
+            
+            {% if item.release_year or item.director %}
             <p class="similar-meta">
-            {{ item.release_year }} · {{ item.director }}
+                {% if item.release_year %}{{ item.release_year }}{% endif %}
+                {% if item.release_year and item.director %} · {% endif %}
+                {% if item.director %}{{ item.director }}{% endif %}
             </p>
+            {% endif %}
 
+            {% if item.vote_average is not none %}
             <p class="similar-rating">
-            ★ {{ item.vote_average }}
+                ★ {{ item.vote_average }}
             </p>
+            {% endif %}
 
             <div class="similar-genres">
             {% for genre in item.genres[:2] %}

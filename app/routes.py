@@ -75,8 +75,12 @@ def _film_ke_dict(movie: Movie) -> dict:
         "vote_average": float(vote) if vote is not None else None,
         "vote_count": int(movie.vote_count or 0),
         "poster_url": _poster_url(movie.poster_path),
-        "duration": None,
-        "cast": [],
+        "duration": (
+            f"{int(movie.runtime)} menit"
+            if movie.runtime is not None
+            else None
+        ),
+        "cast": movie.cast,
     }
 
 
@@ -321,13 +325,17 @@ def movie_detail(movie_id):
             why = None
 
     return render_template(
-        "pages/movie_detail.html",
-        movie=_film_ke_dict(movie),
-        recommendations=_rekomendasi(movie.id, N_DETAIL),
-        source_movie=source_movie,
-        why=why,
-        runtime_str=None,
-        cast=[],
+    "pages/movie_detail.html",
+    movie=_film_ke_dict(movie),
+    recommendations=_rekomendasi(movie.id, N_DETAIL),
+    source_movie=source_movie,
+    why=why,
+    runtime_str=(
+        f"{int(movie.runtime)} menit"
+        if movie.runtime is not None
+        else None
+    ),
+    cast=movie.cast,
     )
 
 
