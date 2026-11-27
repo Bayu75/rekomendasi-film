@@ -3,7 +3,7 @@
 Cara menjalankan (dari folder utama proyek):
     python scripts/import_csv.py
     python scripts/import_csv.py --csv data/processed/movies_clean_final.csv
-    python scripts/import_csv.py --replace   # kosongkan tabel movies dulu, lalu impor ulang
+    python scripts/import_csv.py --replace   # hapus dan buat ulang tabel movies, lalu impor ulang
 """
 
 import argparse
@@ -20,6 +20,8 @@ from app import create_app  # noqa: E402
 from app.models import Movie, SearchHistory, db  # noqa: E402
 
 DEFAULT_CSV = ROOT_DIR / "data" / "processed" / "movies_clean_final.csv"
+# Sembilan kolom lama wajib ada. poster_path, runtime, dan cast_list opsional
+# (CSV lama tanpa kolom itu tetap bisa diimpor; nilainya menjadi None).
 REQUIRED_COLUMNS = [
     "id",
     "title",
@@ -42,7 +44,7 @@ def teks(value, max_len=None):
     if kosong(value):
         return None
     value = str(value).strip()
-    if not value:
+    if not value or value.lower() in {"nan", "none"}:
         return None
     return value[:max_len] if max_len else value
 
@@ -54,6 +56,14 @@ def angka_bulat(value):
         return int(float(value))
     except (TypeError, ValueError):
         return None
+
+
+def durasi_menit(value):
+    """Bilangan bulat menit; kosong, tidak valid, atau <= 0 menjadi None."""
+    nilai = angka_bulat(value)
+    if nilai is None or nilai <= 0:
+        return None
+    return nilai
 
 
 def rating(value):
@@ -77,7 +87,9 @@ def baris_ke_dict(row):
         "release_year": angka_bulat(row["release_year"]),
         "vote_average": rating(row["vote_average"]),
         "vote_count": angka_bulat(row["vote_count"]) or 0,
-        "poster_path": None,
+        "poster_path": teks(row.get("poster_path"), 255),
+        "runtime": durasi_menit(row.get("runtime")),
+        "cast_list": teks(row.get("cast_list")),
     }
 
 
@@ -87,7 +99,7 @@ def main():
     parser.add_argument(
         "--replace",
         action="store_true",
-        help="Hapus semua isi tabel movies (dan riwayat) sebelum impor.",
+        help="Hapus tabel movies dan search_history, lalu buat ulang (termasuk kolom runtime dan cast_list) sebelum impor.",
     )
     args = parser.parse_args()
 
@@ -110,10 +122,17 @@ def main():
     app = create_app()
     with app.app_context():
         if args.replace:
-            SearchHistory.query.delete()
-            Movie.query.delete()
-            db.session.commit()
-            print("Tabel movies dan search_history dikosongkan.")
+            # db.create_all() tidak menambah kolom baru pada tabel yang sudah ada,
+            # jadi tabel movies dan search_history dihapus lalu dibuat ulang.
+            # Tabel users tidak diubah.
+            db.session.remove()
+            SearchHistory.__table__.drop(db.engine, checkfirst=True)
+            Movie.__table__.drop(db.engine, checkfirst=True)
+            db.create_all()
+            print(
+                "Tabel movies dan search_history dihapus lalu dibuat ulang "
+                "(termasuk kolom poster_path, runtime, dan cast_list)."
+            )
 
         sudah_ada = {row[0] for row in db.session.query(Movie.id).all()}
         baru = [baris_ke_dict(r) for r in df.to_dict("records") if int(r["id"]) not in sudah_ada]
