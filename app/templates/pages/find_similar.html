@@ -3,6 +3,8 @@
 
 {% from 'partials/cards.html' import movie_card %}
 
+{% from 'partials/badges.html' import similarity_badge %}
+
 {% block title %}Cari Film Serupa - MovieMatch{% endblock %}
 
 {% block content %}
@@ -825,21 +827,19 @@
 
     {% for movie in similar_movies %}
     <div class="result-movie">
-
-        <span class="similarity-badge">
-            ● {{ (movie.similarity * 100)|round|int }}% Mirip
-        </span>
+      
 
         {{ movie_card(
-            movie,
-            index=loop.index0,
-            href=url_for(
-                'main.movie_detail',
-                movie_id=movie.id,
-                dari=selected_movie.id,
-                **{'from': request.full_path.rstrip('?')}
-            )
-        ) }}
+          movie,
+          similarity=movie.similarity_percent,
+          index=loop.index0,
+          href=url_for(
+              'main.movie_detail',
+              movie_id=movie.id,
+              dari=selected_movie.id,
+              **{'from': request.full_path.rstrip('?')}
+          )
+      ) }}
 
     </div>
     {% endfor %}

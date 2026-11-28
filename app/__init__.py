@@ -75,6 +75,9 @@ def create_app(config_override=None, testing_config=None):
             continue
         app.config[key] = value
 
+    # Otomatis memuat ulang template HTML/Jinja saat ada perubahan
+    app.config["TEMPLATES_AUTO_RELOAD"] = True
+
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
