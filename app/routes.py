@@ -31,11 +31,11 @@ logger = logging.getLogger(__name__)
 
 main = Blueprint("main", __name__)
 
-PER_PAGE = 24
+PER_PAGE = 25
 N_POPULER = 10
 N_PERSONAL = 8
 N_DETAIL = 6
-N_SERUPA = 12
+N_SERUPA = 15
 N_KANDIDAT_SERUPA = 60
 N_RIWAYAT_MODEL = 10
 N_RIWAYAT_PREVIEW = 5
