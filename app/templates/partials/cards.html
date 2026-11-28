@@ -134,7 +134,9 @@
         </p>
         {% endif %}
 
-        {{ similarity_badge(movie.similarity, size='sm') }}
+        {% if movie.similarity_percent is not none %}
+          {{ similarity_badge(movie.similarity_percent, size='sm') }}
+        {% endif %}
 
       </div>
 
