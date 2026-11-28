@@ -43,9 +43,6 @@ class Movie(db.Model):
     runtime = db.Column(db.Integer, nullable=True)
     cast_list = db.Column(db.Text, nullable=True)
 
-    # Data tambahan untuk halaman detail film
-    runtime = db.Column(db.Float, nullable=True)
-    cast_list = db.Column(db.Text, nullable=True)
 
     @property
     def genre_list(self):
