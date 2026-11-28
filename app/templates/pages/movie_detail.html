@@ -544,11 +544,22 @@
     }
 
     .similar-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 12px;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
     }
 
+    .similar-grid > a {
+        flex: 0 0 320px;
+        min-width: 0;
+        scroll-snap-align: start;
+    }
 
     .similar-card {
         display: flex;
@@ -633,11 +644,6 @@
         white-space: nowrap;
     }
 
-    @media (max-width: 800px) {
-        .similar-grid {
-            grid-template-columns: 1fr;
-        }
-    }
 
     @media (max-width: 600px) {
         .similar-header {
